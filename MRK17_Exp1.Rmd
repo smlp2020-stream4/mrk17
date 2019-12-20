@@ -31,29 +31,29 @@ The data (variables and observations) used by Masson et al. (2017) are available
 |Subj     | Subject identifier |
 |Item     | Target (non-)word  |    
 |trial    | Trial number |
-|Qlty     | Target quality is _clear_ or _dim_  |
+|Qlty     | Target quality is _clear_ or _degraded_  |
 |Frq      | Target frequency is _high_  or _low_ |
 |TPR      | Target is _related_ or _unrelated_ to prime |
-|lagQlty  | Lag target quality is _clear_ or _dim_  |
+|lagQlty  | Lag target quality is _clear_ or _degraded_  |
 |lagTrg   | Lag target require _word_ or _nonword_ response |
 |rt       | Reaction time [ms] |
 
 `lagQlty` and `lagTrg` refer to conditions on the previous trial. 
 
-We rename the five two-levels factors as follows:
+Corresponding indicator variables (-1/+1):
 
 |Factor|Variable| Description
 |------|-----------|
-|Q     |Qlty    | Target quality is _clear_ or _dim_   |
+|Q     |Qlty    | Target quality is _clear_ or _degraded_   |
 |F     |Frq     | Target frequency is _high_  or _low_ |
-|P     |TPR     | Target is _related_ or _unrelated_ to prime |
-|L     |lagQlty | Lag target quality is _clear_ or _dim_  |
-|W     |lagTrg  | Lag target require _word_ or _nonword_ response |
+|T     |TPR     | Target is _related_ or _unrelated_ to prime |
+|lQ     |lagQlty | Lag target quality is _clear_ or _degraded_  |
+|lT     |lagTrg  | Lag target require _word_ or _nonword_ response |
 
 # Read data and add transformations of variables
 
 ```{r}
-dat <- readRDS("MRK17_Exp1.rds")
+dat <- readRDS("MRK17_Exp1.Rds")
 
 # set contrasts 
 contrasts(dat$Frq)     <- contr.sum(2)
@@ -64,17 +64,17 @@ contrasts(dat$lagTrg)  <- contr.sum(2)
 
 # Letter codes for factors, converted to indicator variables
 mm <- model.matrix(~ 1 + Frq*TPR*Qlty*lagQlty*lagTrg, data=dat)
-dat$F <- mm[,2]
-dat$P <- mm[,3]
-dat$Q <- mm[,4]
-dat$L <- mm[,5]
-dat$W <- mm[,6]
+dat$F  <- mm[,2]
+dat$T  <- mm[,3]
+dat$Q  <- mm[,4]
+dat$lQ <- mm[,5]
+dat$lT <- mm[,6]
 
 # reciprocal rt 
 dat$rrt <- -1000/dat$rt  # justified by boxcox for LDT
 
 # centered trial
-dat$trial.c <- dat$trial - 240 
+dat$trial.c <- dat$trial - 240 # intercept is last trial of first half of session
 ```
 
 # A parsimonious LMM
@@ -82,19 +82,19 @@ dat$trial.c <- dat$trial - 240
 This LMM specification is identical to the final LMM in Masson and Kliegl (2013).
 
 ```{r m_prsm, cache=TRUE}
-prsmLMM <- lmer(rrt ~ 1 + F*P*Q*L*W + (1+Q | Subj) + (0+W | Subj) + (1 | Item) + (0+P | Item), 
+prsmLMM <- lmer(rrt ~ 1 + F*T*Q*lQ*lT + (1+Q | Subj) + (0+lT | Subj) + (1 | Item) + (0+T | Item), 
                      data=dat, REML=FALSE, control=lmerControl(calc.derivs=FALSE))
 
 summary(rePCA(prsmLMM))
 VarCorr(prsmLMM)
 
 # Test correlation parameter
-prsmLMM_nocorr <- lmer(rrt ~ 1 + F*P*Q*L*W + (1+Q || Subj) + (0+W | Subj) + (1 | Item) + (0+P | Item), 
+zcp_prsmLMM <- lmer(rrt ~ 1 + F*T*Q*lQ*lT + (1+Q || Subj) + (0+lT | Subj) + (1 | Item) + (0+T | Item), 
                         data=dat, REML=FALSE, control=lmerControl(calc.derivs=FALSE))
-summary(rePCA(prsmLMM_nocorr))
-VarCorr(prsmLMM_nocorr)
+summary(rePCA(zcp_prsmLMM))
+VarCorr(zcp_prsmLMM)
 
-anova(prsmLMM_nocorr, prsmLMM)
+anova(zcp_prsmLMM, prsmLMM)
 
 print(summary(prsmLMM), corr=FALSE)
 ```

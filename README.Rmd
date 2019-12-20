@@ -27,7 +27,7 @@ Upper-case variables are factors; lower-case variables are numeric.
 |Subj     | Subject identifier |
 |CC       | Eight different random trial sequences ( _cc1_ to _cc2_ ); between-subject factor; not used |
 |trial    | Trial number |
-|Qlty     | Target quality is _clear_ or _dim_  |
+|Qlty     | Target quality is _clear_ or _degraded_  |
 |Frq      | Target frequency is _high_  or _low_ |
 |TPR      | Target is _related_ or _unrelated_ to prime |
 |Prime    | Prime word; not used |
@@ -97,17 +97,17 @@ The data (variables and observations) used by Masson et al. (2017) are available
 |Subj     | Subject identifier |
 |Item     | Target (non-)word  |    
 |trial    | Trial number |
-|Qlty     | Target quality is _clear_ or _dim_  |
+|Qlty     | Target quality is _clear_ or _degraded_  |
 |Frq      | Target frequency is _high_  or _low_ |
 |TPR      | Target is _related_ or _unrelated_ to prime |
-|lagQlty  | Lag target quality is _clear_ or _dim_  |
+|lagQlty  | Lag target quality is _clear_ or _degraded_  |
 |lagTrg   | Lag target require _word_ or _nonword_ response |
 |rt       | Reaction time [ms] |
 
 `lagQlty` and `lagTrg` refer to conditions on the previous trial. 
 
 ```{r}
-saveRDS(dat3, "MRK17_Exp1.rds")
+saveRDS(dat3, "MRK17_Exp1.Rds")
 ```
 
 # Appendix

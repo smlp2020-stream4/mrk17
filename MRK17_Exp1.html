@@ -364,7 +364,7 @@ summary {
 
 <h1 class="title toc-ignore">Analysis of MRK17_Exp1</h1>
 <h4 class="author">Reinhold Kliegl</h4>
-<h4 class="date">2019-12-20 (last revised: 2019-12-20 07:55:12)</h4>
+<h4 class="date">2019-12-20 (last revised: 2019-12-20 13:31:46)</h4>
 
 </div>
 
@@ -410,7 +410,7 @@ library(lme4)</code></pre>
 </tr>
 <tr class="even">
 <td>Qlty</td>
-<td>Target quality is <em>clear</em> or <em>dim</em></td>
+<td>Target quality is <em>clear</em> or <em>degraded</em></td>
 </tr>
 <tr class="odd">
 <td>Frq</td>
@@ -422,7 +422,7 @@ library(lme4)</code></pre>
 </tr>
 <tr class="odd">
 <td>lagQlty</td>
-<td>Lag target quality is <em>clear</em> or <em>dim</em></td>
+<td>Lag target quality is <em>clear</em> or <em>degraded</em></td>
 </tr>
 <tr class="even">
 <td>lagTrg</td>
@@ -435,7 +435,7 @@ library(lme4)</code></pre>
 </tbody>
 </table>
 <p><code>lagQlty</code> and <code>lagTrg</code> refer to conditions on the previous trial.</p>
-<p>We rename the five two-levels factors as follows:</p>
+<p>Corresponding indicator variables (-1/+1):</p>
 <table>
 <thead>
 <tr class="header">
@@ -453,15 +453,15 @@ library(lme4)</code></pre>
 <td>Frq</td>
 </tr>
 <tr class="odd">
-<td>P</td>
+<td>T</td>
 <td>TPR</td>
 </tr>
 <tr class="even">
-<td>L</td>
+<td>lQ</td>
 <td>lagQlty</td>
 </tr>
 <tr class="odd">
-<td>W</td>
+<td>lT</td>
 <td>lagTrg</td>
 </tr>
 </tbody>
@@ -469,7 +469,7 @@ library(lme4)</code></pre>
 </div>
 <div id="read-data-and-add-transformations-of-variables" class="section level1">
 <h1><span class="header-section-number">3</span> Read data and add transformations of variables</h1>
-<pre class="r"><code>dat &lt;- readRDS(&quot;MRK17_Exp1.rds&quot;)
+<pre class="r"><code>dat &lt;- readRDS(&quot;MRK17_Exp1.Rds&quot;)
 
 # set contrasts 
 contrasts(dat$Frq)     &lt;- contr.sum(2)
@@ -480,22 +480,22 @@ contrasts(dat$lagTrg)  &lt;- contr.sum(2)
 
 # Letter codes for factors, converted to indicator variables
 mm &lt;- model.matrix(~ 1 + Frq*TPR*Qlty*lagQlty*lagTrg, data=dat)
-dat$F &lt;- mm[,2]
-dat$P &lt;- mm[,3]
-dat$Q &lt;- mm[,4]
-dat$L &lt;- mm[,5]
-dat$W &lt;- mm[,6]
+dat$F  &lt;- mm[,2]
+dat$T  &lt;- mm[,3]
+dat$Q  &lt;- mm[,4]
+dat$lQ &lt;- mm[,5]
+dat$lT &lt;- mm[,6]
 
 # reciprocal rt 
 dat$rrt &lt;- -1000/dat$rt  # justified by boxcox for LDT
 
 # centered trial
-dat$trial.c &lt;- dat$trial - 240 </code></pre>
+dat$trial.c &lt;- dat$trial - 240 # intercept is last trial of first half of session</code></pre>
 </div>
 <div id="a-parsimonious-lmm" class="section level1">
 <h1><span class="header-section-number">4</span> A parsimonious LMM</h1>
 <p>This LMM specification is identical to the final LMM in Masson and Kliegl (2013).</p>
-<pre class="r"><code>prsmLMM &lt;- lmer(rrt ~ 1 + F*P*Q*L*W + (1+Q | Subj) + (0+W | Subj) + (1 | Item) + (0+P | Item), 
+<pre class="r"><code>prsmLMM &lt;- lmer(rrt ~ 1 + F*T*Q*lQ*lT + (1+Q | Subj) + (0+lT | Subj) + (1 | Item) + (0+T | Item), 
                      data=dat, REML=FALSE, control=lmerControl(calc.derivs=FALSE))
 
 summary(rePCA(prsmLMM))</code></pre>
@@ -514,16 +514,16 @@ summary(rePCA(prsmLMM))</code></pre>
 ## Cumulative Proportion  0.9480 0.98078 1.00000</code></pre>
 <pre class="r"><code>VarCorr(prsmLMM)</code></pre>
 <pre><code>##  Groups   Name        Std.Dev.  Corr  
-##  Item     P           0.0081765       
+##  Item     T           0.0081765       
 ##  Item.1   (Intercept) 0.0566229       
-##  Subj     W           0.0325988       
+##  Subj     lT          0.0325988       
 ##  Subj.1   (Intercept) 0.1750360       
 ##           Q           0.0276200 -0.422
 ##  Residual             0.2939513</code></pre>
 <pre class="r"><code># Test correlation parameter
-prsmLMM_nocorr &lt;- lmer(rrt ~ 1 + F*P*Q*L*W + (1+Q || Subj) + (0+W | Subj) + (1 | Item) + (0+P | Item), 
+zcp_prsmLMM &lt;- lmer(rrt ~ 1 + F*T*Q*lQ*lT + (1+Q || Subj) + (0+lT | Subj) + (1 | Item) + (0+T | Item), 
                         data=dat, REML=FALSE, control=lmerControl(calc.derivs=FALSE))
-summary(rePCA(prsmLMM_nocorr))</code></pre>
+summary(rePCA(zcp_prsmLMM))</code></pre>
 <pre><code>## $Item
 ## Importance of components:
 ##                          [,1]    [,2]
@@ -537,30 +537,30 @@ summary(rePCA(prsmLMM_nocorr))</code></pre>
 ## Standard deviation     0.5953 0.11104 0.09400
 ## Proportion of Variance 0.9436 0.03283 0.02353
 ## Cumulative Proportion  0.9436 0.97647 1.00000</code></pre>
-<pre class="r"><code>VarCorr(prsmLMM_nocorr)</code></pre>
+<pre class="r"><code>VarCorr(zcp_prsmLMM)</code></pre>
 <pre><code>##  Groups   Name        Std.Dev. 
-##  Item     P           0.0082466
+##  Item     T           0.0082466
 ##  Item.1   (Intercept) 0.0566357
-##  Subj     W           0.0326390
+##  Subj     lT          0.0326390
 ##  Subj.1   Q           0.0276312
 ##  Subj.2   (Intercept) 0.1749985
 ##  Residual             0.2939478</code></pre>
-<pre class="r"><code>anova(prsmLMM_nocorr, prsmLMM)</code></pre>
+<pre class="r"><code>anova(zcp_prsmLMM, prsmLMM)</code></pre>
 <pre><code>## Data: dat
 ## Models:
-## prsmLMM_nocorr: rrt ~ 1 + F * P * Q * L * W + ((1 | Subj) + (0 + Q | Subj)) + 
-## prsmLMM_nocorr:     (0 + W | Subj) + (1 | Item) + (0 + P | Item)
-## prsmLMM: rrt ~ 1 + F * P * Q * L * W + (1 + Q | Subj) + (0 + W | Subj) + 
-## prsmLMM:     (1 | Item) + (0 + P | Item)
-##                npar    AIC    BIC  logLik deviance  Chisq Df Pr(&gt;Chisq)   
-## prsmLMM_nocorr   38 7271.9 7564.7 -3597.9   7195.9                        
-## prsmLMM          39 7264.8 7565.3 -3593.4   7186.8 9.0573  1   0.002616 **
+## zcp_prsmLMM: rrt ~ 1 + F * T * Q * lQ * lT + ((1 | Subj) + (0 + Q | Subj)) + 
+## zcp_prsmLMM:     (0 + lT | Subj) + (1 | Item) + (0 + T | Item)
+## prsmLMM: rrt ~ 1 + F * T * Q * lQ * lT + (1 + Q | Subj) + (0 + lT | Subj) + 
+## prsmLMM:     (1 | Item) + (0 + T | Item)
+##             npar    AIC    BIC  logLik deviance  Chisq Df Pr(&gt;Chisq)   
+## zcp_prsmLMM   38 7271.9 7564.7 -3597.9   7195.9                        
+## prsmLMM       39 7264.8 7565.3 -3593.4   7186.8 9.0573  1   0.002616 **
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
 <pre class="r"><code>print(summary(prsmLMM), corr=FALSE)</code></pre>
 <pre><code>## Linear mixed model fit by maximum likelihood  [&#39;lmerMod&#39;]
-## Formula: rrt ~ 1 + F * P * Q * L * W + (1 + Q | Subj) + (0 + W | Subj) +  
-##     (1 | Item) + (0 + P | Item)
+## Formula: rrt ~ 1 + F * T * Q * lQ * lT + (1 + Q | Subj) + (0 + lT | Subj) +  
+##     (1 | Item) + (0 + T | Item)
 ##    Data: dat
 ## Control: lmerControl(calc.derivs = FALSE)
 ## 
@@ -573,9 +573,9 @@ summary(rePCA(prsmLMM_nocorr))</code></pre>
 ## 
 ## Random effects:
 ##  Groups   Name        Variance  Std.Dev. Corr 
-##  Item     P           6.685e-05 0.008176      
+##  Item     T           6.685e-05 0.008176      
 ##  Item.1   (Intercept) 3.206e-03 0.056623      
-##  Subj     W           1.063e-03 0.032599      
+##  Subj     lT          1.063e-03 0.032599      
 ##  Subj.1   (Intercept) 3.064e-02 0.175036      
 ##           Q           7.629e-04 0.027620 -0.42
 ##  Residual             8.641e-02 0.293951      
@@ -585,36 +585,36 @@ summary(rePCA(prsmLMM_nocorr))</code></pre>
 ##               Estimate Std. Error t value
 ## (Intercept) -1.637e+00  2.094e-02 -78.208
 ## F            1.937e-02  4.320e-03   4.483
-## P            1.881e-02  2.361e-03   7.966
+## T            1.881e-02  2.361e-03   7.966
 ## Q            4.290e-02  3.969e-03  10.809
-## L            1.746e-03  2.315e-03   0.754
-## W            8.360e-03  4.463e-03   1.873
-## F:P          7.112e-03  2.362e-03   3.012
+## lQ           1.746e-03  2.315e-03   0.754
+## lT           8.360e-03  4.463e-03   1.873
+## F:T          7.112e-03  2.362e-03   3.012
 ## F:Q          1.413e-03  2.301e-03   0.614
-## P:Q         -1.341e-03  2.302e-03  -0.583
-## F:L          1.052e-03  2.321e-03   0.453
-## P:L          2.407e-03  2.321e-03   1.037
-## Q:L         -7.598e-03  2.319e-03  -3.276
-## F:W         -5.366e-04  2.314e-03  -0.232
-## P:W         -2.925e-05  2.318e-03  -0.013
-## Q:W         -1.855e-03  2.318e-03  -0.800
-## L:W          5.246e-03  2.316e-03   2.265
-## F:P:Q       -3.623e-04  2.303e-03  -0.157
-## F:P:L       -1.178e-03  2.320e-03  -0.507
-## F:Q:L        2.737e-03  2.323e-03   1.178
-## P:Q:L       -3.932e-03  2.322e-03  -1.693
-## F:P:W        1.986e-03  2.319e-03   0.857
-## F:Q:W       -1.126e-03  2.317e-03  -0.486
-## P:Q:W        2.619e-04  2.319e-03   0.113
-## F:L:W        1.507e-03  2.322e-03   0.649
-## P:L:W        8.681e-05  2.322e-03   0.037
-## Q:L:W        9.168e-03  2.318e-03   3.954
-## F:P:Q:L      2.344e-03  2.320e-03   1.011
-## F:P:Q:W      1.487e-03  2.321e-03   0.641
-## F:P:L:W     -3.088e-03  2.321e-03  -1.330
-## F:Q:L:W     -3.936e-03  2.321e-03  -1.696
-## P:Q:L:W     -2.026e-03  2.321e-03  -0.873
-## F:P:Q:L:W    1.449e-03  2.318e-03   0.625</code></pre>
+## T:Q         -1.341e-03  2.302e-03  -0.583
+## F:lQ         1.052e-03  2.321e-03   0.453
+## T:lQ         2.407e-03  2.321e-03   1.037
+## Q:lQ        -7.598e-03  2.319e-03  -3.276
+## F:lT        -5.366e-04  2.314e-03  -0.232
+## T:lT        -2.925e-05  2.318e-03  -0.013
+## Q:lT        -1.855e-03  2.318e-03  -0.800
+## lQ:lT        5.246e-03  2.316e-03   2.265
+## F:T:Q       -3.623e-04  2.303e-03  -0.157
+## F:T:lQ      -1.178e-03  2.320e-03  -0.507
+## F:Q:lQ       2.737e-03  2.323e-03   1.178
+## T:Q:lQ      -3.932e-03  2.322e-03  -1.693
+## F:T:lT       1.986e-03  2.319e-03   0.857
+## F:Q:lT      -1.126e-03  2.317e-03  -0.486
+## T:Q:lT       2.619e-04  2.319e-03   0.113
+## F:lQ:lT      1.507e-03  2.322e-03   0.649
+## T:lQ:lT      8.681e-05  2.322e-03   0.037
+## Q:lQ:lT      9.168e-03  2.318e-03   3.954
+## F:T:Q:lQ     2.344e-03  2.320e-03   1.011
+## F:T:Q:lT     1.487e-03  2.321e-03   0.641
+## F:T:lQ:lT   -3.088e-03  2.321e-03  -1.330
+## F:Q:lQ:lT   -3.936e-03  2.321e-03  -1.696
+## T:Q:lQ:lT   -2.026e-03  2.321e-03  -0.873
+## F:T:Q:lQ:lT  1.449e-03  2.318e-03   0.625</code></pre>
 </div>
 <div id="appendix" class="section level1">
 <h1><span class="header-section-number">5</span> Appendix</h1>
@@ -637,12 +637,12 @@ summary(rePCA(prsmLMM_nocorr))</code></pre>
 ## [1] lme4_1.1-21.9002 Matrix_1.2-18   
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] Rcpp_1.0.3       codetools_0.2-16 lattice_0.20-38  digest_0.6.23   
-##  [5] MASS_7.3-51.4    grid_3.6.1       nlme_3.1-143     magrittr_1.5    
-##  [9] evaluate_0.14    rlang_0.4.2      stringi_1.4.3    minqa_1.2.4     
-## [13] nloptr_1.2.1     boot_1.3-23      rmarkdown_2.0    splines_3.6.1   
-## [17] statmod_1.4.32   tools_3.6.1      stringr_1.4.0    xfun_0.11       
-## [21] yaml_2.2.0       compiler_3.6.1   htmltools_0.4.0  knitr_1.26</code></pre>
+##  [1] Rcpp_1.0.3      lattice_0.20-38 digest_0.6.23   MASS_7.3-51.4  
+##  [5] grid_3.6.1      nlme_3.1-143    magrittr_1.5    evaluate_0.14  
+##  [9] rlang_0.4.2     stringi_1.4.3   minqa_1.2.4     nloptr_1.2.1   
+## [13] boot_1.3-23     rmarkdown_2.0   splines_3.6.1   statmod_1.4.32 
+## [17] tools_3.6.1     stringr_1.4.0   xfun_0.11       yaml_2.2.0     
+## [21] compiler_3.6.1  htmltools_0.4.0 knitr_1.26</code></pre>
 </div>
 
 

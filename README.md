@@ -46,7 +46,7 @@ Upper-case variables are factors; lower-case variables are numeric.
 </tr>
 <tr class="even">
 <td>Qlty</td>
-<td>Target quality is <em>clear</em> or <em>dim</em></td>
+<td>Target quality is <em>clear</em> or <em>degraded</em></td>
 </tr>
 <tr class="odd">
 <td>Frq</td>
@@ -218,17 +218,17 @@ available in file `MRK17_Exp1.RDS`
 | Subj     | Subject identifier                              |
 | Item     | Target (non-)word                               |
 | trial    | Trial number                                    |
-| Qlty     | Target quality is *clear* or *dim*              |
+| Qlty     | Target quality is *clear* or *degraded*         |
 | Frq      | Target frequency is *high* or *low*             |
 | TPR      | Target is *related* or *unrelated* to prime     |
-| lagQlty  | Lag target quality is *clear* or *dim*          |
+| lagQlty  | Lag target quality is *clear* or *degraded*     |
 | lagTrg   | Lag target require *word* or *nonword* response |
 | rt       | Reaction time \[ms\]                            |
 
 `lagQlty` and `lagTrg` refer to conditions on the previous trial.
 
 ``` r
-saveRDS(dat3, "MRK17_Exp1.rds")
+saveRDS(dat3, "MRK17_Exp1.Rds")
 ```
 
 Appendix
