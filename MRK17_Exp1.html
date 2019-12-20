@@ -364,7 +364,7 @@ summary {
 
 <h1 class="title toc-ignore">Analysis of MRK17_Exp1</h1>
 <h4 class="author">Reinhold Kliegl</h4>
-<h4 class="date">2019-12-20 (last revised: 2019-12-20 13:31:46)</h4>
+<h4 class="date">2019-12-20 (last revised: 2019-12-20 15:25:18)</h4>
 
 </div>
 
@@ -413,7 +413,7 @@ library(lme4)</code></pre>
 <td>Target quality is <em>clear</em> or <em>degraded</em></td>
 </tr>
 <tr class="odd">
-<td>Frq</td>
+<td>Freq</td>
 <td>Target frequency is <em>high</em> or <em>low</em></td>
 </tr>
 <tr class="even">
@@ -425,7 +425,7 @@ library(lme4)</code></pre>
 <td>Lag target quality is <em>clear</em> or <em>degraded</em></td>
 </tr>
 <tr class="even">
-<td>lagTrg</td>
+<td>lagTrgt</td>
 <td>Lag target require <em>word</em> or <em>nonword</em> response</td>
 </tr>
 <tr class="odd">
@@ -434,7 +434,7 @@ library(lme4)</code></pre>
 </tr>
 </tbody>
 </table>
-<p><code>lagQlty</code> and <code>lagTrg</code> refer to conditions on the previous trial.</p>
+<p><code>lagQlty</code> and <code>lagTrgt</code> refer to experimental conditions in the last trial.</p>
 <p>Corresponding indicator variables (-1/+1):</p>
 <table>
 <thead>
@@ -462,7 +462,7 @@ library(lme4)</code></pre>
 </tr>
 <tr class="odd">
 <td>lT</td>
-<td>lagTrg</td>
+<td>lagTrgt</td>
 </tr>
 </tbody>
 </table>
@@ -472,14 +472,14 @@ library(lme4)</code></pre>
 <pre class="r"><code>dat &lt;- readRDS(&quot;MRK17_Exp1.Rds&quot;)
 
 # set contrasts 
-contrasts(dat$Frq)     &lt;- contr.sum(2)
+contrasts(dat$Freq)    &lt;- contr.sum(2)
 contrasts(dat$TPR)     &lt;- contr.sum(2)
 contrasts(dat$Qlty)    &lt;- contr.sum(2)
 contrasts(dat$lagQlty) &lt;- contr.sum(2)
-contrasts(dat$lagTrg)  &lt;- contr.sum(2)
+contrasts(dat$lagTrgt) &lt;- contr.sum(2)
 
 # Letter codes for factors, converted to indicator variables
-mm &lt;- model.matrix(~ 1 + Frq*TPR*Qlty*lagQlty*lagTrg, data=dat)
+mm &lt;- model.matrix(~ 1 + Freq*TPR*Qlty*lagQlty*lagTrgt, data=dat)
 dat$F  &lt;- mm[,2]
 dat$T  &lt;- mm[,3]
 dat$Q  &lt;- mm[,4]

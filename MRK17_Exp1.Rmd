@@ -32,13 +32,13 @@ The data (variables and observations) used by Masson et al. (2017) are available
 |Item     | Target (non-)word  |    
 |trial    | Trial number |
 |Qlty     | Target quality is _clear_ or _degraded_  |
-|Frq      | Target frequency is _high_  or _low_ |
+|Freq     | Target frequency is _high_  or _low_ |
 |TPR      | Target is _related_ or _unrelated_ to prime |
 |lagQlty  | Lag target quality is _clear_ or _degraded_  |
-|lagTrg   | Lag target require _word_ or _nonword_ response |
+|lagTrgt  | Lag target require _word_ or _nonword_ response |
 |rt       | Reaction time [ms] |
 
-`lagQlty` and `lagTrg` refer to conditions on the previous trial. 
+`lagQlty` and `lagTrgt` refer to experimental conditions in the last trial. 
 
 Corresponding indicator variables (-1/+1):
 
@@ -47,8 +47,8 @@ Corresponding indicator variables (-1/+1):
 |Q     |Qlty    | Target quality is _clear_ or _degraded_   |
 |F     |Frq     | Target frequency is _high_  or _low_ |
 |T     |TPR     | Target is _related_ or _unrelated_ to prime |
-|lQ     |lagQlty | Lag target quality is _clear_ or _degraded_  |
-|lT     |lagTrg  | Lag target require _word_ or _nonword_ response |
+|lQ    |lagQlty | Lag target quality is _clear_ or _degraded_  |
+|lT    |lagTrgt | Lag target require _word_ or _nonword_ response |
 
 # Read data and add transformations of variables
 
@@ -56,14 +56,14 @@ Corresponding indicator variables (-1/+1):
 dat <- readRDS("MRK17_Exp1.Rds")
 
 # set contrasts 
-contrasts(dat$Frq)     <- contr.sum(2)
+contrasts(dat$Freq)    <- contr.sum(2)
 contrasts(dat$TPR)     <- contr.sum(2)
 contrasts(dat$Qlty)    <- contr.sum(2)
 contrasts(dat$lagQlty) <- contr.sum(2)
-contrasts(dat$lagTrg)  <- contr.sum(2)
+contrasts(dat$lagTrgt) <- contr.sum(2)
 
 # Letter codes for factors, converted to indicator variables
-mm <- model.matrix(~ 1 + Frq*TPR*Qlty*lagQlty*lagTrg, data=dat)
+mm <- model.matrix(~ 1 + Freq*TPR*Qlty*lagQlty*lagTrgt, data=dat)
 dat$F  <- mm[,2]
 dat$T  <- mm[,3]
 dat$Q  <- mm[,4]

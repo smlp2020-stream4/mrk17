@@ -364,7 +364,7 @@ summary {
 
 <h1 class="title toc-ignore">README for MRK17_Exp1</h1>
 <h4 class="author">Reinhold Kliegl</h4>
-<h4 class="date">2019-12-20 (last revised: 2019-12-20 13:33:13)</h4>
+<h4 class="date">2019-12-20 (last revised: 2019-12-20 15:21:03)</h4>
 
 </div>
 
@@ -419,7 +419,7 @@ summary {
 <td>Target quality is <em>clear</em> or <em>degraded</em></td>
 </tr>
 <tr class="odd">
-<td>Frq</td>
+<td>Freq</td>
 <td>Target frequency is <em>high</em> or <em>low</em></td>
 </tr>
 <tr class="even">
@@ -463,7 +463,7 @@ str(data)</code></pre>
 ##  $ CC   : Factor w/ 8 levels &quot;cc1&quot;,&quot;cc2&quot;,&quot;cc3&quot;,..: 1 1 1 1 1 1 1 1 1 1 ...
 ##  $ trial: num  1 2 3 4 5 6 7 8 9 10 ...
 ##  $ Qlty : Factor w/ 2 levels &quot;Degraded&quot;,&quot;Clear&quot;: 1 1 2 1 2 1 1 1 1 1 ...
-##  $ Frq  : Factor w/ 3 levels &quot;NW&quot;,&quot;LF&quot;,&quot;HF&quot;: 1 2 3 1 3 1 1 1 3 3 ...
+##  $ Freq : Factor w/ 3 levels &quot;NW&quot;,&quot;LF&quot;,&quot;HF&quot;: 1 2 3 1 3 1 1 1 3 3 ...
 ##  $ TPR  : Factor w/ 2 levels &quot;Unr&quot;,&quot;Rel&quot;: 1 1 1 1 2 1 1 1 2 1 ...
 ##  $ Prime: Factor w/ 480 levels &quot;sweet&quot;,&quot;burst&quot;,..: 1 2 3 4 5 6 7 8 9 10 ...
 ##  $ Item : Factor w/ 480 levels &quot;PORDLY&quot;,&quot;CAKE&quot;,..: 1 2 3 4 5 6 7 8 9 10 ...
@@ -475,7 +475,7 @@ str(data)</code></pre>
 ##   ..   CC = col_factor(levels = NULL, ordered = FALSE, include_na = FALSE),
 ##   ..   trial = col_double(),
 ##   ..   Qlty = col_factor(levels = NULL, ordered = FALSE, include_na = FALSE),
-##   ..   Frq = col_factor(levels = NULL, ordered = FALSE, include_na = FALSE),
+##   ..   Freq = col_factor(levels = NULL, ordered = FALSE, include_na = FALSE),
 ##   ..   TPR = col_factor(levels = NULL, ordered = FALSE, include_na = FALSE),
 ##   ..   Prime = col_factor(levels = NULL, ordered = FALSE, include_na = FALSE),
 ##   ..   Item = col_factor(levels = NULL, ordered = FALSE, include_na = FALSE),
@@ -490,11 +490,11 @@ str(data)</code></pre>
 <p>The innovative hypotheses of this experiment relate to experimental effects associated with the last trial, specifically (1) its target quality (clear or dim) and (2) whether the last target (lagTrg) required a word or a nonword response (ignoring the frequency of the word). These conditions are computed from the data. We also generate new lower-case labels for factor levels.</p>
 <pre class="r"><code>dat1 &lt;- data %&gt;% 
         mutate(Qlty = fct_recode(Qlty, &quot;clear&quot; = &#39;Clear&#39;, &quot;degraded&quot; = &#39;Degraded&#39;),
-               Frq = fct_recode(Frq, &quot;high&quot; = &#39;HF&#39;, &quot;low&quot; = &#39;LF&#39;, &quot;NW&quot; = &quot;NW&quot;),
+               Freq = fct_recode(Freq, &quot;high&quot; = &#39;HF&#39;, &quot;low&quot; = &#39;LF&#39;, &quot;NW&quot; = &quot;NW&quot;),
                TPR = fct_recode(TPR, &quot;related&quot; = &#39;Rel&#39;, &quot;unrelated&quot; = &quot;Unr&quot;),
                lagQlty = lag(Qlty),
-               lagTrg = lag(Frq),
-               lagTrg = fct_recode(lagTrg, &quot;word&quot; = &#39;high&#39;, &quot;word&quot; = &#39;low&#39;, &quot;nonword&quot; = &quot;NW&quot;)
+               lagTrgt = lag(Freq),
+               lagTrgt = fct_recode(lagTrgt, &quot;word&quot; = &#39;high&#39;, &quot;word&quot; = &#39;low&#39;, &quot;nonword&quot; = &quot;NW&quot;)
                )  </code></pre>
 </div>
 <div id="filtering-observations" class="section level2">
@@ -504,17 +504,17 @@ str(data)</code></pre>
 lag_trials &lt;- which(dat1$trial %in% ix)
 dat2 &lt;- dat1 %&gt;% 
         slice(lag_trials) %&gt;% 
-        filter(Frq != &quot;NW&quot;, Score == &quot;C&quot;, between(rt, 300, 3000))
-dat2$Frq &lt;- droplevels(dat2$Frq)  # get rid of empty &quot;NW&quot; level</code></pre>
+        filter(Freq != &quot;NW&quot;, Score == &quot;C&quot;, between(rt, 300, 3000))
+dat2$Freq &lt;- droplevels(dat2$Freq)  # get rid of empty &quot;NW&quot; level</code></pre>
 </div>
 <div id="selecting-variables" class="section level2">
 <h2><span class="header-section-number">3.3</span> Selecting variables</h2>
 <p>We keep only the relevant variables and reorder them.</p>
 <pre class="r"><code>dat3 &lt;- dat2 %&gt;% 
-        select(Subj, Item, trial, Qlty, Frq, TPR, lagQlty, lagTrg, rt)
+        select(Subj, Item, trial, Qlty, Freq, TPR, lagQlty, lagTrgt, rt)
 dat3</code></pre>
 <pre><code>## # A tibble: 16,409 x 9
-##    Subj  Item    trial Qlty     Frq   TPR       lagQlty  lagTrg     rt
+##    Subj  Item    trial Qlty     Freq  TPR       lagQlty  lagTrgt    rt
 ##    &lt;fct&gt; &lt;fct&gt;   &lt;dbl&gt; &lt;fct&gt;    &lt;fct&gt; &lt;fct&gt;     &lt;fct&gt;    &lt;fct&gt;   &lt;dbl&gt;
 ##  1 S01   CAKE        2 degraded low   unrelated degraded nonword   794
 ##  2 S01   PARTY       3 clear    high  unrelated degraded word      506
@@ -533,10 +533,10 @@ dat3</code></pre>
 ##  $ Item   : Factor w/ 480 levels &quot;PORDLY&quot;,&quot;CAKE&quot;,..: 2 3 5 9 10 11 15 21 22 24 ...
 ##  $ trial  : num  2 3 5 9 10 11 15 21 22 24 ...
 ##  $ Qlty   : Factor w/ 2 levels &quot;degraded&quot;,&quot;clear&quot;: 1 2 2 1 1 2 1 1 2 2 ...
-##  $ Frq    : Factor w/ 2 levels &quot;low&quot;,&quot;high&quot;: 1 2 2 2 2 2 2 1 1 2 ...
+##  $ Freq   : Factor w/ 2 levels &quot;low&quot;,&quot;high&quot;: 1 2 2 2 2 2 2 1 1 2 ...
 ##  $ TPR    : Factor w/ 2 levels &quot;unrelated&quot;,&quot;related&quot;: 1 1 2 2 1 2 2 1 1 2 ...
 ##  $ lagQlty: Factor w/ 2 levels &quot;degraded&quot;,&quot;clear&quot;: 1 1 1 1 1 1 1 2 1 1 ...
-##  $ lagTrg : Factor w/ 2 levels &quot;nonword&quot;,&quot;word&quot;: 1 2 1 1 2 2 1 1 2 1 ...
+##  $ lagTrgt: Factor w/ 2 levels &quot;nonword&quot;,&quot;word&quot;: 1 2 1 1 2 2 1 1 2 1 ...
 ##  $ rt     : num  794 506 491 486 482 542 766 993 552 499 ...</code></pre>
 </div>
 </div>
@@ -568,7 +568,7 @@ dat3</code></pre>
 <td>Target quality is <em>clear</em> or <em>degraded</em></td>
 </tr>
 <tr class="odd">
-<td>Frq</td>
+<td>Freq</td>
 <td>Target frequency is <em>high</em> or <em>low</em></td>
 </tr>
 <tr class="even">
@@ -580,7 +580,7 @@ dat3</code></pre>
 <td>Lag target quality is <em>clear</em> or <em>degraded</em></td>
 </tr>
 <tr class="even">
-<td>lagTrg</td>
+<td>lagTrgt</td>
 <td>Lag target require <em>word</em> or <em>nonword</em> response</td>
 </tr>
 <tr class="odd">

@@ -49,7 +49,7 @@ Upper-case variables are factors; lower-case variables are numeric.
 <td>Target quality is <em>clear</em> or <em>degraded</em></td>
 </tr>
 <tr class="odd">
-<td>Frq</td>
+<td>Freq</td>
 <td>Target frequency is <em>high</em> or <em>low</em></td>
 </tr>
 <tr class="even">
@@ -103,7 +103,7 @@ str(data)
     ##  $ CC   : Factor w/ 8 levels "cc1","cc2","cc3",..: 1 1 1 1 1 1 1 1 1 1 ...
     ##  $ trial: num  1 2 3 4 5 6 7 8 9 10 ...
     ##  $ Qlty : Factor w/ 2 levels "Degraded","Clear": 1 1 2 1 2 1 1 1 1 1 ...
-    ##  $ Frq  : Factor w/ 3 levels "NW","LF","HF": 1 2 3 1 3 1 1 1 3 3 ...
+    ##  $ Freq : Factor w/ 3 levels "NW","LF","HF": 1 2 3 1 3 1 1 1 3 3 ...
     ##  $ TPR  : Factor w/ 2 levels "Unr","Rel": 1 1 1 1 2 1 1 1 2 1 ...
     ##  $ Prime: Factor w/ 480 levels "sweet","burst",..: 1 2 3 4 5 6 7 8 9 10 ...
     ##  $ Item : Factor w/ 480 levels "PORDLY","CAKE",..: 1 2 3 4 5 6 7 8 9 10 ...
@@ -115,7 +115,7 @@ str(data)
     ##   ..   CC = col_factor(levels = NULL, ordered = FALSE, include_na = FALSE),
     ##   ..   trial = col_double(),
     ##   ..   Qlty = col_factor(levels = NULL, ordered = FALSE, include_na = FALSE),
-    ##   ..   Frq = col_factor(levels = NULL, ordered = FALSE, include_na = FALSE),
+    ##   ..   Freq = col_factor(levels = NULL, ordered = FALSE, include_na = FALSE),
     ##   ..   TPR = col_factor(levels = NULL, ordered = FALSE, include_na = FALSE),
     ##   ..   Prime = col_factor(levels = NULL, ordered = FALSE, include_na = FALSE),
     ##   ..   Item = col_factor(levels = NULL, ordered = FALSE, include_na = FALSE),
@@ -139,11 +139,11 @@ labels for factor levels.
 ``` r
 dat1 <- data %>% 
         mutate(Qlty = fct_recode(Qlty, "clear" = 'Clear', "degraded" = 'Degraded'),
-               Frq = fct_recode(Frq, "high" = 'HF', "low" = 'LF', "NW" = "NW"),
+               Freq = fct_recode(Freq, "high" = 'HF', "low" = 'LF', "NW" = "NW"),
                TPR = fct_recode(TPR, "related" = 'Rel', "unrelated" = "Unr"),
                lagQlty = lag(Qlty),
-               lagTrg = lag(Frq),
-               lagTrg = fct_recode(lagTrg, "word" = 'high', "word" = 'low', "nonword" = "NW")
+               lagTrgt = lag(Freq),
+               lagTrgt = fct_recode(lagTrgt, "word" = 'high', "word" = 'low', "nonword" = "NW")
                )  
 ```
 
@@ -162,8 +162,8 @@ ix <- setdiff(1:480, seq(from=1, to=433, by=48))
 lag_trials <- which(dat1$trial %in% ix)
 dat2 <- dat1 %>% 
         slice(lag_trials) %>% 
-        filter(Frq != "NW", Score == "C", between(rt, 300, 3000))
-dat2$Frq <- droplevels(dat2$Frq)  # get rid of empty "NW" level
+        filter(Freq != "NW", Score == "C", between(rt, 300, 3000))
+dat2$Freq <- droplevels(dat2$Freq)  # get rid of empty "NW" level
 ```
 
 Selecting variables
@@ -173,12 +173,12 @@ We keep only the relevant variables and reorder them.
 
 ``` r
 dat3 <- dat2 %>% 
-        select(Subj, Item, trial, Qlty, Frq, TPR, lagQlty, lagTrg, rt)
+        select(Subj, Item, trial, Qlty, Freq, TPR, lagQlty, lagTrgt, rt)
 dat3
 ```
 
     ## # A tibble: 16,409 x 9
-    ##    Subj  Item    trial Qlty     Frq   TPR       lagQlty  lagTrg     rt
+    ##    Subj  Item    trial Qlty     Freq  TPR       lagQlty  lagTrgt    rt
     ##    <fct> <fct>   <dbl> <fct>    <fct> <fct>     <fct>    <fct>   <dbl>
     ##  1 S01   CAKE        2 degraded low   unrelated degraded nonword   794
     ##  2 S01   PARTY       3 clear    high  unrelated degraded word      506
@@ -201,10 +201,10 @@ str(dat3)
     ##  $ Item   : Factor w/ 480 levels "PORDLY","CAKE",..: 2 3 5 9 10 11 15 21 22 24 ...
     ##  $ trial  : num  2 3 5 9 10 11 15 21 22 24 ...
     ##  $ Qlty   : Factor w/ 2 levels "degraded","clear": 1 2 2 1 1 2 1 1 2 2 ...
-    ##  $ Frq    : Factor w/ 2 levels "low","high": 1 2 2 2 2 2 2 1 1 2 ...
+    ##  $ Freq   : Factor w/ 2 levels "low","high": 1 2 2 2 2 2 2 1 1 2 ...
     ##  $ TPR    : Factor w/ 2 levels "unrelated","related": 1 1 2 2 1 2 2 1 1 2 ...
     ##  $ lagQlty: Factor w/ 2 levels "degraded","clear": 1 1 1 1 1 1 1 2 1 1 ...
-    ##  $ lagTrg : Factor w/ 2 levels "nonword","word": 1 2 1 1 2 2 1 1 2 1 ...
+    ##  $ lagTrgt: Factor w/ 2 levels "nonword","word": 1 2 1 1 2 2 1 1 2 1 ...
     ##  $ rt     : num  794 506 491 486 482 542 766 993 552 499 ...
 
 Save
@@ -219,10 +219,10 @@ available in file `MRK17_Exp1.RDS`
 | Item     | Target (non-)word                               |
 | trial    | Trial number                                    |
 | Qlty     | Target quality is *clear* or *degraded*         |
-| Frq      | Target frequency is *high* or *low*             |
+| Freq     | Target frequency is *high* or *low*             |
 | TPR      | Target is *related* or *unrelated* to prime     |
 | lagQlty  | Lag target quality is *clear* or *degraded*     |
-| lagTrg   | Lag target require *word* or *nonword* response |
+| lagTrgt  | Lag target require *word* or *nonword* response |
 | rt       | Reaction time \[ms\]                            |
 
 `lagQlty` and `lagTrg` refer to conditions on the previous trial.
