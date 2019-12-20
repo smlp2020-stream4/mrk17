@@ -2,14 +2,14 @@
 title: "README for MRK17_Exp1"
 author: "Reinhold Kliegl"
 date: "2019-12-20 (last revised: `r format(Sys.time())`)"
-output: 
+output:
     html_document:
         toc: yes
         toc_depth: 2
         number_sections: yes
         toc_float: FALSE
-editor_options: 
-  chunk_output_type: console
+    md_document:
+       variant: markdown_github
 ---
 
 # Background
@@ -37,10 +37,11 @@ Upper-case variables are factors; lower-case variables are numeric.
 
 
 ```{r}
+library(vroom)
 library(dplyr)
 library(forcats)
 
-data <- as_tibble(read.csv("MRK17_Exp1.csv"))
+data <- vroom("MRK17_Exp1.csv", delim=",", col_types='ffdfffffdf')
 str(data)
 ```
 
@@ -48,13 +49,14 @@ str(data)
 
 ## Lag variables
 
-The innovative hypotheses of this experiment relate to experimental effects associated with the last trial, specifically (1) its target quality (clear or dim) and (2) whether the last target (lagTrg) required a word or a nonword response (ignoring the frequency of the word).  These conditions are computed from the data. We also generate new labels for factor levels.
+The innovative hypotheses of this experiment relate to experimental effects associated with the last trial, specifically (1) its target quality (clear or dim) and (2) whether the last target (lagTrg) required a word or a nonword response (ignoring the frequency of the word).  These conditions are computed from the data. We also generate new lower-case labels for factor levels.
 
 ```{r}
 dat1 <- data %>% 
-        mutate(Frq = fct_recode(Frq, "high" = ' HF', "low" = ' LF', "NW" = " NW"),
-               TPR = fct_recode(TPR, "related" = ' Rel', "unrelated" = " Unr"),
-               lagQlty = lag(data$Qlty),
+        mutate(Qlty = fct_recode(Qlty, "clear" = 'Clear', "degraded" = 'Degraded'),
+               Frq = fct_recode(Frq, "high" = 'HF', "low" = 'LF', "NW" = "NW"),
+               TPR = fct_recode(TPR, "related" = 'Rel', "unrelated" = "Unr"),
+               lagQlty = lag(Qlty),
                lagTrg = lag(Frq),
                lagTrg = fct_recode(lagTrg, "word" = 'high', "word" = 'low', "nonword" = "NW")
                )  
@@ -69,7 +71,7 @@ ix <- setdiff(1:480, seq(from=1, to=433, by=48))
 lag_trials <- which(dat1$trial %in% ix)
 dat2 <- dat1 %>% 
         slice(lag_trials) %>% 
-        filter(Frq != "NW", Score == " C", between(rt, 300, 3000))
+        filter(Frq != "NW", Score == "C", between(rt, 300, 3000))
 dat2$Frq <- droplevels(dat2$Frq)  # get rid of empty "NW" level
 ```
 

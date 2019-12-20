@@ -1,0 +1,108 @@
+---
+title: "Analysis of MRK17_Exp1"
+author: "Reinhold Kliegl"
+date: "2019-12-20 (last revised: `r format(Sys.time())`)"
+output: 
+    html_document:
+        toc: yes
+        toc_depth: 2
+        number_sections: yes
+        toc_float: FALSE
+editor_options: 
+  chunk_output_type: console
+---
+
+
+```{r setup, include=TRUE}
+knitr::opts_chunk$set(echo = TRUE)
+library(lme4)
+```
+
+# Background
+
+This semantic-priming experiment was reported in Masson, Rabe, & Kliegl (2017, Exp. 1, Memory & Cognition). It is a direct replication of an experiment reported in Masson & Kliegl (2013, Exp. 1, JEPLMC). Following a prime word a related or unrelated high- or low-frequency target word or a nonword was presented in clear or dim font. The subject's task was to decide as quickly as possible whether the target was a word or a nonword, that is subjects performed a lexical decision task (LDT). The reaction time and the accuracy of the response were recorded. Only correct reaction times to words are included. After filtering there were 16,409 observations recorded from 73 subjects and 240 items.
+
+# Codebook
+
+The data (variables and observations) used by Masson et al. (2017) are available in file `MRK17_Exp1.RDS`
+
+|Variable | Description|
+|---------|----------- |
+|Subj     | Subject identifier |
+|Item     | Target (non-)word  |    
+|trial    | Trial number |
+|Qlty     | Target quality is _clear_ or _dim_  |
+|Frq      | Target frequency is _high_  or _low_ |
+|TPR      | Target is _related_ or _unrelated_ to prime |
+|lagQlty  | Lag target quality is _clear_ or _dim_  |
+|lagTrg   | Lag target require _word_ or _nonword_ response |
+|rt       | Reaction time [ms] |
+
+`lagQlty` and `lagTrg` refer to conditions on the previous trial. 
+
+We rename the five two-levels factors as follows:
+
+|Factor|Variable| Description
+|------|-----------|
+|Q     |Qlty    | Target quality is _clear_ or _dim_   |
+|F     |Frq     | Target frequency is _high_  or _low_ |
+|P     |TPR     | Target is _related_ or _unrelated_ to prime |
+|L     |lagQlty | Lag target quality is _clear_ or _dim_  |
+|W     |lagTrg  | Lag target require _word_ or _nonword_ response |
+
+# Read data and add transformations of variables
+
+```{r}
+dat <- readRDS("MRK17_Exp1.rds")
+
+# set contrasts 
+contrasts(dat$Frq)     <- contr.sum(2)
+contrasts(dat$TPR)     <- contr.sum(2)
+contrasts(dat$Qlty)    <- contr.sum(2)
+contrasts(dat$lagQlty) <- contr.sum(2)
+contrasts(dat$lagTrg)  <- contr.sum(2)
+
+# Letter codes for factors, converted to indicator variables
+mm <- model.matrix(~ 1 + Frq*TPR*Qlty*lagQlty*lagTrg, data=dat)
+dat$F <- mm[,2]
+dat$P <- mm[,3]
+dat$Q <- mm[,4]
+dat$L <- mm[,5]
+dat$W <- mm[,6]
+
+# reciprocal rt 
+dat$rrt <- -1000/dat$rt  # justified by boxcox for LDT
+
+# centered trial
+dat$trial.c <- dat$trial - 240 
+```
+
+# A parsimonious LMM
+
+This LMM specification is identical to the final LMM in Masson and Kliegl (2013).
+
+```{r m_prsm, cache=TRUE}
+prsmLMM <- lmer(rrt ~ 1 + F*P*Q*L*W + (1+Q | Subj) + (0+W | Subj) + (1 | Item) + (0+P | Item), 
+                     data=dat, REML=FALSE, control=lmerControl(calc.derivs=FALSE))
+
+summary(rePCA(prsmLMM))
+VarCorr(prsmLMM)
+
+# Test correlation parameter
+prsmLMM_nocorr <- lmer(rrt ~ 1 + F*P*Q*L*W + (1+Q || Subj) + (0+W | Subj) + (1 | Item) + (0+P | Item), 
+                        data=dat, REML=FALSE, control=lmerControl(calc.derivs=FALSE))
+summary(rePCA(prsmLMM_nocorr))
+VarCorr(prsmLMM_nocorr)
+
+anova(prsmLMM_nocorr, prsmLMM)
+
+print(summary(prsmLMM), corr=FALSE)
+```
+
+
+# Appendix
+
+```{r}
+sessionInfo()
+```
+

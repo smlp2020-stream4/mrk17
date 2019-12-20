@@ -364,7 +364,7 @@ summary {
 
 <h1 class="title toc-ignore">Analysis of MRK17_Exp1</h1>
 <h4 class="author">Reinhold Kliegl</h4>
-<h4 class="date">2019-12-20 (last revised: 2019-12-20 01:42:06)</h4>
+<h4 class="date">2019-12-20 (last revised: 2019-12-20 07:55:12)</h4>
 
 </div>
 
@@ -374,6 +374,7 @@ summary {
 <li><a href="#codebook"><span class="toc-section-number">2</span> Codebook</a></li>
 <li><a href="#read-data-and-add-transformations-of-variables"><span class="toc-section-number">3</span> Read data and add transformations of variables</a></li>
 <li><a href="#a-parsimonious-lmm"><span class="toc-section-number">4</span> A parsimonious LMM</a></li>
+<li><a href="#appendix"><span class="toc-section-number">5</span> Appendix</a></li>
 </ul>
 </div>
 
@@ -501,24 +502,24 @@ summary(rePCA(prsmLMM))</code></pre>
 <pre><code>## $Item
 ## Importance of components:
 ##                          [,1]    [,2]
-## Standard deviation     0.1926 0.02780
-## Proportion of Variance 0.9796 0.02041
+## Standard deviation     0.1926 0.02782
+## Proportion of Variance 0.9796 0.02043
 ## Cumulative Proportion  0.9796 1.00000
 ## 
 ## $Subj
 ## Importance of components:
 ##                          [,1]    [,2]    [,3]
-## Standard deviation     0.5966 0.11085 0.08495
-## Proportion of Variance 0.9480 0.03273 0.01922
+## Standard deviation     0.5968 0.11090 0.08497
+## Proportion of Variance 0.9480 0.03274 0.01922
 ## Cumulative Proportion  0.9480 0.98078 1.00000</code></pre>
 <pre class="r"><code>VarCorr(prsmLMM)</code></pre>
-<pre><code>##  Groups   Name        Std.Dev.  Corr 
-##  Item     P           0.0081728      
-##  Item.1   (Intercept) 0.0566157      
-##  Subj     W           0.0325850      
-##  Subj.1   (Intercept) 0.1749733      
-##           Q           0.0276144 0.422
-##  Residual             0.2939529</code></pre>
+<pre><code>##  Groups   Name        Std.Dev.  Corr  
+##  Item     P           0.0081765       
+##  Item.1   (Intercept) 0.0566229       
+##  Subj     W           0.0325988       
+##  Subj.1   (Intercept) 0.1750360       
+##           Q           0.0276200 -0.422
+##  Residual             0.2939513</code></pre>
 <pre class="r"><code># Test correlation parameter
 prsmLMM_nocorr &lt;- lmer(rrt ~ 1 + F*P*Q*L*W + (1+Q || Subj) + (0+W | Subj) + (1 | Item) + (0+P | Item), 
                         data=dat, REML=FALSE, control=lmerControl(calc.derivs=FALSE))
@@ -526,7 +527,7 @@ summary(rePCA(prsmLMM_nocorr))</code></pre>
 <pre><code>## $Item
 ## Importance of components:
 ##                          [,1]    [,2]
-## Standard deviation     0.1927 0.02806
+## Standard deviation     0.1927 0.02805
 ## Proportion of Variance 0.9792 0.02076
 ## Cumulative Proportion  0.9792 1.00000
 ## 
@@ -537,13 +538,13 @@ summary(rePCA(prsmLMM_nocorr))</code></pre>
 ## Proportion of Variance 0.9436 0.03283 0.02353
 ## Cumulative Proportion  0.9436 0.97647 1.00000</code></pre>
 <pre class="r"><code>VarCorr(prsmLMM_nocorr)</code></pre>
-<pre><code>##  Groups   Name        Std.Dev.
-##  Item     P           0.008247
-##  Item.1   (Intercept) 0.056636
-##  Subj     W           0.032639
-##  Subj.1   Q           0.027631
-##  Subj.2   (Intercept) 0.174998
-##  Residual             0.293948</code></pre>
+<pre><code>##  Groups   Name        Std.Dev. 
+##  Item     P           0.0082466
+##  Item.1   (Intercept) 0.0566357
+##  Subj     W           0.0326390
+##  Subj.1   Q           0.0276312
+##  Subj.2   (Intercept) 0.1749985
+##  Residual             0.2939478</code></pre>
 <pre class="r"><code>anova(prsmLMM_nocorr, prsmLMM)</code></pre>
 <pre><code>## Data: dat
 ## Models:
@@ -556,6 +557,92 @@ summary(rePCA(prsmLMM_nocorr))</code></pre>
 ## prsmLMM          39 7264.8 7565.3 -3593.4   7186.8 9.0573  1   0.002616 **
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<pre class="r"><code>print(summary(prsmLMM), corr=FALSE)</code></pre>
+<pre><code>## Linear mixed model fit by maximum likelihood  [&#39;lmerMod&#39;]
+## Formula: rrt ~ 1 + F * P * Q * L * W + (1 + Q | Subj) + (0 + W | Subj) +  
+##     (1 | Item) + (0 + P | Item)
+##    Data: dat
+## Control: lmerControl(calc.derivs = FALSE)
+## 
+##      AIC      BIC   logLik deviance df.resid 
+##   7264.8   7565.3  -3593.4   7186.8    16370 
+## 
+## Scaled residuals: 
+##     Min      1Q  Median      3Q     Max 
+## -5.4848 -0.6654 -0.0855  0.5994  4.6520 
+## 
+## Random effects:
+##  Groups   Name        Variance  Std.Dev. Corr 
+##  Item     P           6.685e-05 0.008176      
+##  Item.1   (Intercept) 3.206e-03 0.056623      
+##  Subj     W           1.063e-03 0.032599      
+##  Subj.1   (Intercept) 3.064e-02 0.175036      
+##           Q           7.629e-04 0.027620 -0.42
+##  Residual             8.641e-02 0.293951      
+## Number of obs: 16409, groups:  Item, 240; Subj, 73
+## 
+## Fixed effects:
+##               Estimate Std. Error t value
+## (Intercept) -1.637e+00  2.094e-02 -78.208
+## F            1.937e-02  4.320e-03   4.483
+## P            1.881e-02  2.361e-03   7.966
+## Q            4.290e-02  3.969e-03  10.809
+## L            1.746e-03  2.315e-03   0.754
+## W            8.360e-03  4.463e-03   1.873
+## F:P          7.112e-03  2.362e-03   3.012
+## F:Q          1.413e-03  2.301e-03   0.614
+## P:Q         -1.341e-03  2.302e-03  -0.583
+## F:L          1.052e-03  2.321e-03   0.453
+## P:L          2.407e-03  2.321e-03   1.037
+## Q:L         -7.598e-03  2.319e-03  -3.276
+## F:W         -5.366e-04  2.314e-03  -0.232
+## P:W         -2.925e-05  2.318e-03  -0.013
+## Q:W         -1.855e-03  2.318e-03  -0.800
+## L:W          5.246e-03  2.316e-03   2.265
+## F:P:Q       -3.623e-04  2.303e-03  -0.157
+## F:P:L       -1.178e-03  2.320e-03  -0.507
+## F:Q:L        2.737e-03  2.323e-03   1.178
+## P:Q:L       -3.932e-03  2.322e-03  -1.693
+## F:P:W        1.986e-03  2.319e-03   0.857
+## F:Q:W       -1.126e-03  2.317e-03  -0.486
+## P:Q:W        2.619e-04  2.319e-03   0.113
+## F:L:W        1.507e-03  2.322e-03   0.649
+## P:L:W        8.681e-05  2.322e-03   0.037
+## Q:L:W        9.168e-03  2.318e-03   3.954
+## F:P:Q:L      2.344e-03  2.320e-03   1.011
+## F:P:Q:W      1.487e-03  2.321e-03   0.641
+## F:P:L:W     -3.088e-03  2.321e-03  -1.330
+## F:Q:L:W     -3.936e-03  2.321e-03  -1.696
+## P:Q:L:W     -2.026e-03  2.321e-03  -0.873
+## F:P:Q:L:W    1.449e-03  2.318e-03   0.625</code></pre>
+</div>
+<div id="appendix" class="section level1">
+<h1><span class="header-section-number">5</span> Appendix</h1>
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>## R version 3.6.1 (2019-07-05)
+## Platform: x86_64-apple-darwin15.6.0 (64-bit)
+## Running under: macOS Catalina 10.15.2
+## 
+## Matrix products: default
+## BLAS:   /Library/Frameworks/R.framework/Versions/3.6/Resources/lib/libRblas.0.dylib
+## LAPACK: /Library/Frameworks/R.framework/Versions/3.6/Resources/lib/libRlapack.dylib
+## 
+## locale:
+## [1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+## 
+## attached base packages:
+## [1] stats     graphics  grDevices utils     datasets  methods   base     
+## 
+## other attached packages:
+## [1] lme4_1.1-21.9002 Matrix_1.2-18   
+## 
+## loaded via a namespace (and not attached):
+##  [1] Rcpp_1.0.3       codetools_0.2-16 lattice_0.20-38  digest_0.6.23   
+##  [5] MASS_7.3-51.4    grid_3.6.1       nlme_3.1-143     magrittr_1.5    
+##  [9] evaluate_0.14    rlang_0.4.2      stringi_1.4.3    minqa_1.2.4     
+## [13] nloptr_1.2.1     boot_1.3-23      rmarkdown_2.0    splines_3.6.1   
+## [17] statmod_1.4.32   tools_3.6.1      stringr_1.4.0    xfun_0.11       
+## [21] yaml_2.2.0       compiler_3.6.1   htmltools_0.4.0  knitr_1.26</code></pre>
 </div>
 
 
