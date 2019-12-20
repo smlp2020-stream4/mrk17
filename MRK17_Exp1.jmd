@@ -1,0 +1,44 @@
+---
+title: "Direct data input in Julia"
+author: "Douglas Bates"
+date: 2019-12-20
+---
+
+For those with experience with `R` data input, selection and transformation can be done in `R` then the cleaned data frame saved in imported into a Julia session using either the `RCall` or `RData` package.
+
+Alternatively, the data input, selection and transformation can be performed using other Julia packages, as shown here.
+
+```julia;label=packages;term=true
+using CSV, DataFrames, DataFramesMeta, ShiftedArrays
+```
+
+## Reading
+
+The file `MRK17_Exp1.csv` contains
+
+|Variable | Description|
+|---------|----------- |
+|Subj     | Subject identifier |
+|CC       | Eight different random trial sequences ( _cc1_ to _cc8_ ); between-subject factor; not used |
+|trial    | Trial number |
+|Qlty     | Target quality is _clear_ or _degraded_  |
+|Freq     | Target frequency is _high_  or _low_ |
+|TPR      | Target is _related_ or _unrelated_ to prime |
+|Prime    | Prime word; not used |
+|Item     | Target (non-)word  |
+|rt       | Reaction time [ms] |
+|Score    | Correct (_C_) or error (_E_) response |
+
+```julia;label=input;term=true
+mrk17 = CSV.read("MRK17_Exp1.csv")
+describe(mrk17)
+```
+
+Many of the `dplyr`-like operations are available in the `DataFramesMeta` package
+```julia;label=linq;term=true
+dat3 = @linq mrk17 |>
+    transform(lagQlty = lag(:Qlty), lagTrgt = lag(:Freq)) |>
+    where(:Freq .≠ "NW", :Score .== "C", 30 .≤ :rt .≤ 3000) |>
+    select(:Subj, :Item, :trial, :Qlty, :Freq, :TPR, :lagQlty, :lagTrgt, :rt)
+describe(dat3)
+```
