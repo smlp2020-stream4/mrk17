@@ -21,25 +21,79 @@ describe(dat1)
 dat = CSV.read("MRK17_Exp1_xtra.csv")
 describe(dat)
 
-@time m1 = fit(LinearMixedModel,
+# full LMM
+@time fullLMM = fit(LinearMixedModel,
       @formula(rrt ~ 1 + F*T*Q*lQ*lT + (1+T+Q+lQ+lT | Item) + (1+F+T+Q+lQ+lT | Subj)), dat)
 
-
-
-
-show(m1)
-m1.optsum
-
-m1.λ[1]  # for shown target (Item)
-m1.λ[2]  # for subject (Subj)
-
-var1 = abs2.(svdvals(m1.λ[1]));
+## Item-related VCs and CPs
+fullLMM.λ[1]
+var1 = abs2.(svdvals(fullLMM.λ[1]))
 show(var1)
-
-var2 = abs2.(svdvals(m1.λ[2]));
-show(var2)
-
 show(cumsum(var1) ./ sum(var1))
+
+## Subject-related VCs and CPs
+fullLMM.λ[2]
+var2 = abs2.(svdvals(fullLMM.λ[2]));
+show(var2)
 show(cumsum(var2) ./ sum(var2))
 
+## All model parameters
+show(fullLMM)
+
+# zero-correlation parameter LMM
+@time zcpLMM = fit(LinearMixedModel,
+      @formula(rrt ~ 1 + F*T*Q*lQ*lT + zerocorr((1+T+Q+lQ+lT | Item)) + zerocorr((1+F+T+Q+lQ+lT | Subj))), dat)
+
+## Item-related VCs
+zcpLMM.λ[1]
+var1 = abs2.(svdvals(zcpLMM.λ[1]))
+show(var1)
+show(cumsum(var1) ./ sum(var1))
+
+## Subject-related VCs
+zcpLMM.λ[2]
+var2 = abs2.(svdvals(zcpLMM.λ[2]));
+show(var2)
+show(cumsum(var2) ./ sum(var2))
+
+## All model parameters
+show(zcpLMM)
+
+# reduced LMM
+@time redLMM = fit(LinearMixedModel,
+      @formula(rrt ~ 1 + F*T*Q*lQ*lT + zerocorr((1 | Item)) + zerocorr((1+Q | Subj))), dat)
+
+## Item-related VCs
+redLMM.λ[1]
+var1 = abs2.(svdvals(redLMM.λ[1]))
+show(var1)
+show(cumsum(var1) ./ sum(var1))
+
+## Subject-related VCs
+redLMM.λ[2]
+var2 = abs2.(svdvals(redLMM.λ[2]));
+show(var2)
+show(cumsum(var2) ./ sum(var2))
+
+show(redLMM)
+
+# reduced-CP-extended LMM
+@time extLMM = fit(LinearMixedModel,
+      @formula(rrt ~ 1 + F*T*Q*lQ*lT + zerocorr((1 | Item)) + (1+Q | Subj)), dat)
+
+## Item-related VCs
+extLMM.λ[1]
+var1 = abs2.(svdvals(extLMM.λ[1]))
+show(var1)
+show(cumsum(var1) ./ sum(var1))
+
+## Subject-related VCs
+extLMM.λ[2]
+var2 = abs2.(svdvals(extLMM.λ[2]));
+show(var2)
+show(cumsum(var2) ./ sum(var2))
+
+show(extLMM)
+
+# Appendix
 versioninfo()
