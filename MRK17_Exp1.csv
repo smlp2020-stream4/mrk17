@@ -1,4 +1,4 @@
-Subj,CC,trial,Qlty,Freq,TPR,Prime,Item,rt,Score
+Subj,CC,trial,Qlty,Freq,Prime,Pword,Item,rt,Score
 S01,cc1,1,Degraded,NW,Unr,sweet,PORDLY,762,C
 S01,cc1,2,Degraded,LF,Unr,burst,CAKE,794,C
 S01,cc1,3,Clear,HF,Unr,counsel,PARTY,506,C

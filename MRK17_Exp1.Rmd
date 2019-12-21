@@ -32,11 +32,11 @@ The data (variables and observations) used by Masson et al. (2017) are available
 |Subj     | Subject identifier |
 |Item     | Target (non-)word  |    
 |trial    | Trial number |
-|Qlty     | Target quality is _clear_ or _degraded_  |
 |Freq     | Target frequency is _high_  or _low_ |
-|TPR      | Target is _related_ or _unrelated_ to prime |
-|lagQlty  | Lag target quality is _clear_ or _degraded_  |
-|lagTrgt  | Lag target require _word_ or _nonword_ response |
+|Prime    | Prime is _related_ or _unrelated_ to target |
+|Qlty     | Target quality is _clear_ or _degraded_  |
+|lagQlty  | Last-trial target quality is _clear_ or _degraded_  |
+|lagTrgt  | Last-trial target requires _word_ or _nonword_ response |
 |rt       | Reaction time [ms] |
 
 `lagQlty` and `lagTrgt` refer to experimental conditions in the last trial. 
@@ -45,11 +45,11 @@ Corresponding indicator variables (-1/+1):
 
 |Factor|Variable| Description
 |------|-----------|
-|Q     |Qlty    | Target quality is _clear_ or _degraded_   |
 |F     |Frq     | Target frequency is _high_  or _low_ |
-|T     |TPR     | Target is _related_ or _unrelated_ to prime |
-|lQ    |lagQlty | Lag target quality is _clear_ or _degraded_  |
-|lT    |lagTrgt | Lag target require _word_ or _nonword_ response |
+|P     |Prime   | Prime is _related_ or _unrelated_ to target |
+|Q     |Qlty    | Target quality is _clear_ or _degraded_   |
+|lQ    |lagQlty | Last-trial target quality is _clear_ or _degraded_  |
+|lT    |lagTrgt | Last-trail target requires _word_ or _nonword_ response |
 
 # Read data and add transformations of variables
 
@@ -58,15 +58,15 @@ dat <- readRDS("MRK17_Exp1.Rds")
 
 # set contrasts 
 contrasts(dat$Freq)    <- contr.sum(2)
-contrasts(dat$TPR)     <- contr.sum(2)
+contrasts(dat$Prime)     <- contr.sum(2)
 contrasts(dat$Qlty)    <- contr.sum(2)
 contrasts(dat$lagQlty) <- contr.sum(2)
 contrasts(dat$lagTrgt) <- contr.sum(2)
 
 # Letter codes for factors, converted to indicator variables
-mm <- model.matrix(~ 1 + Freq*TPR*Qlty*lagQlty*lagTrgt, data=dat)
+mm <- model.matrix(~ 1 + Freq*Prime*Qlty*lagQlty*lagTrgt, data=dat)
 dat$F  <- mm[,2]
-dat$T  <- mm[,3]
+dat$P  <- mm[,3]
 dat$Q  <- mm[,4]
 dat$lQ <- mm[,5]
 dat$lT <- mm[,6]
@@ -80,22 +80,14 @@ dat$trial.c <- dat$trial - 240 # intercept is last trial of first half of sessio
 
 # A parsimonious LMM
 
-This LMM specification is identical to the final LMM in Masson and Kliegl (2013).
+This LMM specification is identical to the final LMM in Masson & Kliegl (2013, Table 1) as well as Masson, Rabe, and Kliegl (2017, Figure 2).
 
 ```{r m_prsm, cache=TRUE}
-prsmLMM <- lmer(rrt ~ 1 + F*T*Q*lQ*lT + (1+Q | Subj) + (0+lT | Subj) + (1 | Item) + (0+T | Item), 
+prsmLMM <- lmer(rrt ~ 1 + F*P*Q*lQ*lT + (1+Q | Subj) + (0+lT | Subj) + (1 | Item) + (0+P | Item), 
                      data=dat, REML=FALSE, control=lmerControl(calc.derivs=FALSE))
 
 summary(rePCA(prsmLMM))
 VarCorr(prsmLMM)
-
-# Test correlation parameter
-zcp_prsmLMM <- lmer(rrt ~ 1 + F*T*Q*lQ*lT + (1+Q || Subj) + (0+lT | Subj) + (1 | Item) + (0+T | Item), 
-                        data=dat, REML=FALSE, control=lmerControl(calc.derivs=FALSE))
-summary(rePCA(zcp_prsmLMM))
-VarCorr(zcp_prsmLMM)
-
-anova(zcp_prsmLMM, prsmLMM)
 
 print(summary(prsmLMM), corr=FALSE)
 ```
@@ -104,8 +96,8 @@ print(summary(prsmLMM), corr=FALSE)
 
 ```{r}
 dat <- data.frame(dat)
-save(dat, file="MRK17_Exp1_xtra.RData")
 saveRDS(dat, file="MRK17_Exp1_xtra.Rds" )
+save(dat, file="MRK17_Exp1_xtra.RData")
 write_csv(dat, "MRK17_Exp1_xtra.csv")
 ```
 

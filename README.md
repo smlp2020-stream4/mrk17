@@ -45,19 +45,19 @@ Upper-case variables are factors; lower-case variables are numeric.
 <td>Trial number</td>
 </tr>
 <tr class="even">
+<td>Freq</td>
+<td>Target frequency is <em>high</em> or <em>low</em></td>
+</tr>
+<tr class="odd">
+<td>Prime</td>
+<td>Prime word is <em>related</em> or <em>unrelated</em> to target</td>
+</tr>
+<tr class="even">
 <td>Qlty</td>
 <td>Target quality is <em>clear</em> or <em>degraded</em></td>
 </tr>
 <tr class="odd">
-<td>Freq</td>
-<td>Target frequency is <em>high</em> or <em>low</em></td>
-</tr>
-<tr class="even">
-<td>TPR</td>
-<td>Target is <em>related</em> or <em>unrelated</em> to prime</td>
-</tr>
-<tr class="odd">
-<td>Prime</td>
+<td>Pword</td>
 <td>Prime word; not used</td>
 </tr>
 <tr class="even">
@@ -104,8 +104,8 @@ str(data)
     ##  $ trial: num  1 2 3 4 5 6 7 8 9 10 ...
     ##  $ Qlty : Factor w/ 2 levels "Degraded","Clear": 1 1 2 1 2 1 1 1 1 1 ...
     ##  $ Freq : Factor w/ 3 levels "NW","LF","HF": 1 2 3 1 3 1 1 1 3 3 ...
-    ##  $ TPR  : Factor w/ 2 levels "Unr","Rel": 1 1 1 1 2 1 1 1 2 1 ...
-    ##  $ Prime: Factor w/ 480 levels "sweet","burst",..: 1 2 3 4 5 6 7 8 9 10 ...
+    ##  $ Prime: Factor w/ 2 levels "Unr","Rel": 1 1 1 1 2 1 1 1 2 1 ...
+    ##  $ Pword: Factor w/ 480 levels "sweet","burst",..: 1 2 3 4 5 6 7 8 9 10 ...
     ##  $ Item : Factor w/ 480 levels "PORDLY","CAKE",..: 1 2 3 4 5 6 7 8 9 10 ...
     ##  $ rt   : num  762 794 506 612 491 631 637 690 486 482 ...
     ##  $ Score: Factor w/ 2 levels "C","E": 1 1 1 1 1 1 1 1 1 1 ...
@@ -116,8 +116,8 @@ str(data)
     ##   ..   trial = col_double(),
     ##   ..   Qlty = col_factor(levels = NULL, ordered = FALSE, include_na = FALSE),
     ##   ..   Freq = col_factor(levels = NULL, ordered = FALSE, include_na = FALSE),
-    ##   ..   TPR = col_factor(levels = NULL, ordered = FALSE, include_na = FALSE),
     ##   ..   Prime = col_factor(levels = NULL, ordered = FALSE, include_na = FALSE),
+    ##   ..   Pword = col_factor(levels = NULL, ordered = FALSE, include_na = FALSE),
     ##   ..   Item = col_factor(levels = NULL, ordered = FALSE, include_na = FALSE),
     ##   ..   rt = col_double(),
     ##   ..   Score = col_factor(levels = NULL, ordered = FALSE, include_na = FALSE)
@@ -140,7 +140,7 @@ labels for factor levels.
 dat1 <- data %>% 
         mutate(Qlty = fct_recode(Qlty, "clear" = 'Clear', "degraded" = 'Degraded'),
                Freq = fct_recode(Freq, "high" = 'HF', "low" = 'LF', "NW" = "NW"),
-               TPR = fct_recode(TPR, "related" = 'Rel', "unrelated" = "Unr"),
+               Prime = fct_recode(Prime, "related" = 'Rel', "unrelated" = "Unr"),
                lagQlty = lag(Qlty),
                lagTrgt = lag(Freq),
                lagTrgt = fct_recode(lagTrgt, "word" = 'high', "word" = 'low', "nonword" = "NW")
@@ -169,27 +169,28 @@ dat2$Freq <- droplevels(dat2$Freq)  # get rid of empty "NW" level
 Selecting variables
 -------------------
 
-We keep only the relevant variables and reorder them.
+We keep only the relevant variables and reorder them according to that
+in articles.
 
 ``` r
 dat3 <- dat2 %>% 
-        select(Subj, Item, trial, Qlty, Freq, TPR, lagQlty, lagTrgt, rt)
+        select(Subj, Item, trial, Freq, Prime, Qlty, lagQlty, lagTrgt, rt)
 dat3
 ```
 
     ## # A tibble: 16,409 x 9
-    ##    Subj  Item    trial Qlty     Freq  TPR       lagQlty  lagTrgt    rt
-    ##    <fct> <fct>   <dbl> <fct>    <fct> <fct>     <fct>    <fct>   <dbl>
-    ##  1 S01   CAKE        2 degraded low   unrelated degraded nonword   794
-    ##  2 S01   PARTY       3 clear    high  unrelated degraded word      506
-    ##  3 S01   SPOT        5 clear    high  related   degraded nonword   491
-    ##  4 S01   LONG        9 degraded high  related   degraded nonword   486
-    ##  5 S01   YEAR       10 degraded high  unrelated degraded word      482
-    ##  6 S01   COUNTRY    11 clear    high  related   degraded word      542
-    ##  7 S01   HAVE       15 degraded high  related   degraded nonword   766
-    ##  8 S01   TUSK       21 degraded low   unrelated clear    nonword   993
-    ##  9 S01   CARDS      22 clear    low   unrelated degraded word      552
-    ## 10 S01   FIGHT      24 clear    high  related   degraded nonword   499
+    ##    Subj  Item    trial Freq  Prime     Qlty     lagQlty  lagTrgt    rt
+    ##    <fct> <fct>   <dbl> <fct> <fct>     <fct>    <fct>    <fct>   <dbl>
+    ##  1 S01   CAKE        2 low   unrelated degraded degraded nonword   794
+    ##  2 S01   PARTY       3 high  unrelated clear    degraded word      506
+    ##  3 S01   SPOT        5 high  related   clear    degraded nonword   491
+    ##  4 S01   LONG        9 high  related   degraded degraded nonword   486
+    ##  5 S01   YEAR       10 high  unrelated degraded degraded word      482
+    ##  6 S01   COUNTRY    11 high  related   clear    degraded word      542
+    ##  7 S01   HAVE       15 high  related   degraded degraded nonword   766
+    ##  8 S01   TUSK       21 low   unrelated degraded clear    nonword   993
+    ##  9 S01   CARDS      22 low   unrelated clear    degraded word      552
+    ## 10 S01   FIGHT      24 high  related   clear    degraded nonword   499
     ## # … with 16,399 more rows
 
 ``` r
@@ -200,9 +201,9 @@ str(dat3)
     ##  $ Subj   : Factor w/ 73 levels "S01","S02","S03",..: 1 1 1 1 1 1 1 1 1 1 ...
     ##  $ Item   : Factor w/ 480 levels "PORDLY","CAKE",..: 2 3 5 9 10 11 15 21 22 24 ...
     ##  $ trial  : num  2 3 5 9 10 11 15 21 22 24 ...
-    ##  $ Qlty   : Factor w/ 2 levels "degraded","clear": 1 2 2 1 1 2 1 1 2 2 ...
     ##  $ Freq   : Factor w/ 2 levels "low","high": 1 2 2 2 2 2 2 1 1 2 ...
-    ##  $ TPR    : Factor w/ 2 levels "unrelated","related": 1 1 2 2 1 2 2 1 1 2 ...
+    ##  $ Prime  : Factor w/ 2 levels "unrelated","related": 1 1 2 2 1 2 2 1 1 2 ...
+    ##  $ Qlty   : Factor w/ 2 levels "degraded","clear": 1 2 2 1 1 2 1 1 2 2 ...
     ##  $ lagQlty: Factor w/ 2 levels "degraded","clear": 1 1 1 1 1 1 1 2 1 1 ...
     ##  $ lagTrgt: Factor w/ 2 levels "nonword","word": 1 2 1 1 2 2 1 1 2 1 ...
     ##  $ rt     : num  794 506 491 486 482 542 766 993 552 499 ...
@@ -213,17 +214,17 @@ Save
 The data (variables and observations) used by Masson et al. (2017) are
 available in file `MRK17_Exp1.RDS`
 
-| Variable | Description                                     |
-|----------|-------------------------------------------------|
-| Subj     | Subject identifier                              |
-| Item     | Target (non-)word                               |
-| trial    | Trial number                                    |
-| Qlty     | Target quality is *clear* or *degraded*         |
-| Freq     | Target frequency is *high* or *low*             |
-| TPR      | Target is *related* or *unrelated* to prime     |
-| lagQlty  | Lag target quality is *clear* or *degraded*     |
-| lagTrgt  | Lag target require *word* or *nonword* response |
-| rt       | Reaction time \[ms\]                            |
+| Variable | Description                                            |
+|----------|--------------------------------------------------------|
+| Subj     | Subject identifier                                     |
+| Item     | Target (non-)word                                      |
+| trial    | Trial number                                           |
+| Freq     | Target frequency is *high* or *low*                    |
+| Prime    | Target is *related* or *unrelated* to prime            |
+| Qlty     | Target quality is *clear* or *degraded*                |
+| lagQlty  | Last-trial target quality is *clear* or *degraded*     |
+| lagTrgt  | Last-trial target require *word* or *nonword* response |
+| rt       | Reaction time \[ms\]                                   |
 
 `lagQlty` and `lagTrg` refer to conditions on the previous trial.
 

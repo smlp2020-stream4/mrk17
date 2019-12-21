@@ -19,13 +19,13 @@ The file `MRK17_Exp1.csv` contains
 |Variable | Description|
 |---------|----------- |
 |Subj     | Subject identifier |
-|CC       | Eight different random trial sequences ( _cc1_ to _cc8_ ); between-subject factor; not used |
+|CC       | Eight different random trial sequences ( _cc1_ to _cc2_ ); between-subject factor; not used |
 |trial    | Trial number |
 |Qlty     | Target quality is _clear_ or _degraded_  |
 |Freq     | Target frequency is _high_  or _low_ |
-|TPR      | Target is _related_ or _unrelated_ to prime |
-|Prime    | Prime word; not used |
-|Item     | Target (non-)word  |
+|Prime    | Prime word is _related_ or _unrelated_ to target |
+|Pword    | Prime word; not used |
+|Item     | Target (non-)word  |    
 |rt       | Reaction time [ms] |
 |Score    | Correct (_C_) or error (_E_) response |
 
@@ -39,6 +39,6 @@ Many of the `dplyr`-like operations are available in the `DataFramesMeta` packag
 dat3 = @linq mrk17 |>
     transform(lagQlty = lag(:Qlty), lagTrgt = lag(:Freq)) |>
     where(:Freq .≠ "NW", :Score .== "C", 30 .≤ :rt .≤ 3000) |>
-    select(:Subj, :Item, :trial, :Qlty, :Freq, :TPR, :lagQlty, :lagTrgt, :rt)
+    select(:Subj, :Item, :trial, :Freq, :Prime, :Qlty, :lagQlty, :lagTrgt, :rt)
 describe(dat3)
 ```

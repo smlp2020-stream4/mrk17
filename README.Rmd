@@ -10,6 +10,8 @@ output:
         toc_float: FALSE
     md_document:
        variant: markdown_github
+editor_options: 
+  chunk_output_type: console
 ---
 
 # Background
@@ -27,10 +29,10 @@ Upper-case variables are factors; lower-case variables are numeric.
 |Subj     | Subject identifier |
 |CC       | Eight different random trial sequences ( _cc1_ to _cc2_ ); between-subject factor; not used |
 |trial    | Trial number |
-|Qlty     | Target quality is _clear_ or _degraded_  |
 |Freq     | Target frequency is _high_  or _low_ |
-|TPR      | Target is _related_ or _unrelated_ to prime |
-|Prime    | Prime word; not used |
+|Prime    | Prime word is _related_ or _unrelated_ to target |
+|Qlty     | Target quality is _clear_ or _degraded_  |
+|Pword    | Prime word; not used |
 |Item     | Target (non-)word  |    
 |rt       | Reaction time [ms] |
 |Score    | Correct (_C_) or error (_E_) response |
@@ -55,7 +57,7 @@ The innovative hypotheses of this experiment relate to experimental effects asso
 dat1 <- data %>% 
         mutate(Qlty = fct_recode(Qlty, "clear" = 'Clear', "degraded" = 'Degraded'),
                Freq = fct_recode(Freq, "high" = 'HF', "low" = 'LF', "NW" = "NW"),
-               TPR = fct_recode(TPR, "related" = 'Rel', "unrelated" = "Unr"),
+               Prime = fct_recode(Prime, "related" = 'Rel', "unrelated" = "Unr"),
                lagQlty = lag(Qlty),
                lagTrgt = lag(Freq),
                lagTrgt = fct_recode(lagTrgt, "word" = 'high', "word" = 'low', "nonword" = "NW")
@@ -78,11 +80,11 @@ dat2$Freq <- droplevels(dat2$Freq)  # get rid of empty "NW" level
 
 ## Selecting variables
 
-We keep only the relevant variables and reorder them. 
+We keep only the relevant variables and reorder them according to that in articles.
 
 ```{r}
 dat3 <- dat2 %>% 
-        select(Subj, Item, trial, Qlty, Freq, TPR, lagQlty, lagTrgt, rt)
+        select(Subj, Item, trial, Freq, Prime, Qlty, lagQlty, lagTrgt, rt)
 dat3
 str(dat3)
 ```
@@ -97,11 +99,11 @@ The data (variables and observations) used by Masson et al. (2017) are available
 |Subj     | Subject identifier |
 |Item     | Target (non-)word  |    
 |trial    | Trial number |
-|Qlty     | Target quality is _clear_ or _degraded_  |
 |Freq     | Target frequency is _high_  or _low_ |
-|TPR      | Target is _related_ or _unrelated_ to prime |
-|lagQlty  | Lag target quality is _clear_ or _degraded_  |
-|lagTrgt  | Lag target require _word_ or _nonword_ response |
+|Prime      | Target is _related_ or _unrelated_ to prime |
+|Qlty     | Target quality is _clear_ or _degraded_  |
+|lagQlty  | Last-trial target quality is _clear_ or _degraded_  |
+|lagTrgt  | Last-trial target require _word_ or _nonword_ response |
 |rt       | Reaction time [ms] |
 
 `lagQlty` and `lagTrg` refer to conditions on the previous trial. 
