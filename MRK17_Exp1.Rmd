@@ -15,6 +15,7 @@ editor_options:
 
 ```{r setup, include=TRUE}
 knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
 library(lme4)
 ```
 
@@ -99,6 +100,14 @@ anova(zcp_prsmLMM, prsmLMM)
 print(summary(prsmLMM), corr=FALSE)
 ```
 
+# Output
+
+```{r}
+dat <- data.frame(dat)
+save(dat, file="MRK17_Exp1_xtra.RData")
+saveRDS(dat, file="MRK17_Exp1_xtra.Rds" )
+write_csv(dat, "MRK17_Exp1_xtra.csv")
+```
 
 # Appendix
 
