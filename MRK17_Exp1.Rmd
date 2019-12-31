@@ -32,24 +32,17 @@ The data (variables and observations) used by Masson et al. (2017) are available
 |Subj     | Subject identifier |
 |Item     | Target (non-)word  |    
 |trial    | Trial number |
-|Freq     | Target frequency is _high_  or _low_ |
-|Prime    | Prime is _related_ or _unrelated_ to target |
-|Qlty     | Target quality is _clear_ or _degraded_  |
-|lagQlty  | Last-trial target quality is _clear_ or _degraded_  |
-|lagTrgt  | Last-trial target requires _word_ or _nonword_ response |
+|F        | Target frequency is _high_  or _low_ |
+|P        | Prime is _related_ or _unrelated_ to target |
+|Q        | Target quality is _clear_ or _degraded_   |
+|lQ       | Last-trial target quality is _clear_ or _degraded_  |
+|lT       | Last-trail target requires _word_ or _nonword_ response |
 |rt       | Reaction time [ms] |
 
 `lagQlty` and `lagTrgt` refer to experimental conditions in the last trial. 
 
 Corresponding indicator variables (-1/+1):
 
-|Factor|Variable| Description
-|------|-----------|
-|F     |Frq     | Target frequency is _high_  or _low_ |
-|P     |Prime   | Prime is _related_ or _unrelated_ to target |
-|Q     |Qlty    | Target quality is _clear_ or _degraded_   |
-|lQ    |lagQlty | Last-trial target quality is _clear_ or _degraded_  |
-|lT    |lagTrgt | Last-trail target requires _word_ or _nonword_ response |
 
 # Read data and add transformations of variables
 
@@ -57,19 +50,19 @@ Corresponding indicator variables (-1/+1):
 dat <- readRDS("MRK17_Exp1.Rds")
 
 # set contrasts 
-contrasts(dat$Freq)    <- contr.sum(2)
-contrasts(dat$Prime)     <- contr.sum(2)
-contrasts(dat$Qlty)    <- contr.sum(2)
-contrasts(dat$lagQlty) <- contr.sum(2)
-contrasts(dat$lagTrgt) <- contr.sum(2)
+contrasts(dat$F)  <- contr.sum(2)
+contrasts(dat$P)  <- contr.sum(2)
+contrasts(dat$Q)  <- contr.sum(2)
+contrasts(dat$lQ) <- contr.sum(2)
+contrasts(dat$lT) <- contr.sum(2)
 
-# Letter codes for factors, converted to indicator variables
-mm <- model.matrix(~ 1 + Freq*Prime*Qlty*lagQlty*lagTrgt, data=dat)
-dat$F  <- mm[,2]
-dat$P  <- mm[,3]
-dat$Q  <- mm[,4]
-dat$lQ <- mm[,5]
-dat$lT <- mm[,6]
+# Letter codes for factors, converted to indicator variables (numeric -> lower case)
+mm <- model.matrix(~ 1 + F*P*Q*lQ*lT, data=dat)
+dat$f  <- mm[,2]
+dat$p  <- mm[,3]
+dat$q  <- mm[,4]
+dat$lq <- mm[,5]
+dat$lf <- mm[,6]
 
 # reciprocal rt 
 dat$rrt <- -1000/dat$rt  # justified by boxcox for LDT
@@ -83,7 +76,7 @@ dat$trial.c <- dat$trial - 240 # intercept is last trial of first half of sessio
 This LMM specification is identical to the final LMM in Masson & Kliegl (2013, Table 1) as well as Masson, Rabe, and Kliegl (2017, Figure 2).
 
 ```{r m_prsm, cache=TRUE}
-prsmLMM <- lmer(rrt ~ 1 + F*P*Q*lQ*lT + (1+Q | Subj) + (0+lT | Subj) + (1 | Item) + (0+P | Item), 
+prsmLMM <- lmer(rrt ~ 1 + F*P*Q*lQ*lT + (1+q | Subj) + (0+lq | Subj) + (1 | Item) + (0+p | Item), 
                      data=dat, REML=FALSE, control=lmerControl(calc.derivs=FALSE))
 
 summary(rePCA(prsmLMM))
@@ -92,14 +85,6 @@ VarCorr(prsmLMM)
 print(summary(prsmLMM), corr=FALSE)
 ```
 
-# Output
-
-```{r}
-dat <- data.frame(dat)
-saveRDS(dat, file="MRK17_Exp1_xtra.Rds" )
-save(dat, file="MRK17_Exp1_xtra.RData")
-write_csv(dat, "MRK17_Exp1_xtra.csv")
-```
 
 # Appendix
 
