@@ -1,0 +1,94 @@
+---
+title: "Data Preparation for MRK17_Exp1"
+author: "Reinhold Kliegl"
+date: "2019-12-31 (last revised: `r format(Sys.time())`)"
+output:
+    html_document:
+        toc: yes
+        toc_depth: 2
+        number_sections: yes
+        toc_float: FALSE
+    md_document:
+       variant: markdown_github
+editor_options:
+  chunk_output_type: console
+---
+
+# Reading the data
+
+```{r}
+library(vroom)
+library(dplyr)
+library(forcats)
+
+data <- vroom("MRK17_Exp1.csv", delim=",", col_types='ffifffffif')
+str(data)
+```
+
+# Preprocessing
+
+## Lag variables
+
+The innovative hypotheses of this experiment relate to experimental effects associated with the last trial, specifically (1) its target quality (clear or dim) and (2) whether the last target (lagTrg) required a word or a nonword response (ignoring the frequency of the word).  These conditions are computed from the data. We also generate new lower-case labels for factor levels.
+
+```{r}
+dat1 <- data %>%
+        mutate(lQ = lag(Q),
+               lF = lag(F),
+               lT = fct_recode(lF, "WD" = 'HF', "WD" = 'LF')
+               )
+```
+
+## Filtering observations
+
+The first of a ten blocks of 48 trials occurred after a pause. Therefore it does not have valid lag information and these trials are excluded from the analyses. Also, in an LDT, all nonword trials are routinely left out from rt analyses. Finally, incorrectly answered word trials and trials with very short (< 300 ms) or very long rt's are removed as well. This leaves us with 16,409 observations.
+
+```{r}
+ix <- setdiff(1:480, seq(from=1, to=433, by=48))
+lag_trials <- which(dat1$trial %in% ix)
+dat2 <- dat1 %>%
+        slice(lag_trials) %>%
+        filter(F != "NW", Score == "C", between(rt, 300, 3000))
+dat2$F <- droplevels(dat2$F)  # get rid of empty "NW" level
+```
+
+
+## Selecting variables
+
+We keep only the relevant variables and reorder them according to that in articles.
+
+```{r}
+dat3 <- dat2 %>%
+        select(Subj, Item, trial, F, P, Q, lQ, lT, rt)
+dat3
+str(dat3)
+```
+
+
+# Save
+
+The data (variables and observations) used by Masson et al. (2017) are available in file `MRK17_Exp1.RDS`
+
+|Variable | Description|
+|---------|----------- |
+|Subj     | Subject identifier |
+|Item     | Target (non-)word  |
+|trial    | Trial number |
+|F        | Target frequency is _high_ (`HF`) or _low_ (`LF`) |
+|P        | Target is _related_ (`rel`) or _unrelated_ (`unr`) to prime |
+|Q        | Target quality is _clear_ (`clr`) or _degraded_ (`deg`) |
+|lQ       | Last-trial target quality is _clear_ (`clr`) or _degraded_ (`deg`) |
+|lT       | Last-trial target was a _word_ (`WD`) or _nonword_ (`NW`) |
+|rt       | Reaction time [ms] |
+
+`lQ` and `lT` refer to conditions on the previous trial.
+
+```{r}
+saveRDS(dat3, "MRK17_Exp1.rds")
+```
+
+# Appendix
+
+```{r}
+sessionInfo()
+```

@@ -1,0 +1,108 @@
+---
+title: "Direct data input in Julia"
+author: "Douglas Bates"
+date: 2019-12-31
+options:
+    line_width: 92
+---
+
+# Reading the CSV file
+
+For those with experience with `R`, data input, selection and transformation can be done in `R` then the cleaned data frame saved and imported into a Julia session using either the `RCall` or `RData` package.
+
+## Packages
+
+Alternatively, the data input, selection and transformation can be performed using other Julia packages, as shown here.
+
+```julia;label=packages;term=true
+using CSV, DataFrames, DataFramesMeta, MixedModels, ShiftedArrays
+```
+
+As the names imply, the `CSV` and `DataFrames` packages are for reading and writing CSV files and for creating and manipulating data frames.  `DataFramesMeta` provides functions and macros for operations like those in SQL or the `dply` package for R.  The `ShiftedArrays` package provides the `lag` function used below.
+
+## Reading
+
+The file `MRK17_Exp1.csv` contains
+
+|Variable | Description|
+|---------|----------- |
+|Subj     | Subject identifier (`S01` to `S73`)|
+|CC       | Eight different random trial sequences (`cc1` to `cc8`); between-subject factor; not used |
+|trial    | Trial number (1 to 480 for each subject, performed in 10 blocks of 48)|
+|Q        | Target quality is _clear_ (`clr`) or _degraded_  (`deg`) |
+|F        | Target is _non-word_ (`NW`), _high frequency_ (`HF`) or _low frequency_ (`LF`)|
+|P        | Prime word is _related_ (`rel`) or _unrelated_ (`unr`) to target |
+|Pword    | Prime word; not used |
+|Item     | Target word or non-word  |
+|rt       | Reaction time [ms] |
+|Score    | Response was correct (`C`) or error (`E`)|
+
+```julia;label=input;term=true
+mrk17 = CSV.read("MRK17_Exp1.csv")
+describe(mrk17)
+```
+
+## Creating the lagged variables
+
+The 480 trials for each subject were conducted as 10 blocks of 48 trials.  The research hypothesis related to the previous target quality and word/non-word status.  Trials at the beginning of each block will have a missing value for each of these lagged variables.  The beginning of a block corresponds to a trial number whose remainder is 1 when divided by 48.
+
+The transformation, row and column selections are all wrapped in a query, like those of SQL (Structured Query Language), using the `@linq` (language integrated query) macro from the `DataFramesMeta` package
+```julia;label=linq;term=true
+dat = @linq mrk17 |>
+    transform(lQ = lag(:Q), lT = lag(replace.(:F, r"[LH]F" => "WD"))) |>
+    where(:F .≠ "NW", :Score .== "C", 300 .≤ :rt .≤ 3000, rem.(:trial, 48) .≠ 1) |>
+    select(:Subj, :Item, :trial, :F, :P, :Q, :lQ, :lT, :rt);
+disallowmissing!(dat); # lQ and lT allow for but does not contain missing data
+describe(dat)
+```
+
+# Model fitting
+
+## Coding of two-level factors
+
+The contrasts for the two-level factors use the Helmert coding, which is ±1.
+```julia;term=true
+const HC = HelmertCoding();
+contrasts = Dict(n => HC for (n,v) in eachcol(dat, true) if length(levels(v)) == 2)
+```
+
+The response to be modeled is the negative reciprocal or the response time.  As the response is measured in milliseconds we use `-1000/rt` which will have units of (negative) responses per second.
+
+```julia;label=m1;term=true
+m1form = @formula (-1000/rt) ~ 1+F*P*Q*lQ*lT + (1+F+P+Q+lQ+lT|Subj) + (1+P+Q+lQ+lT|Item);
+m1 = fit(MixedModel, m1form, dat, contrasts=contrasts)
+```
+
+The fitted relative covariance factors are
+```julia;term=true
+first(m1.λ)
+```
+and
+```julia;term=true
+last(m1.λ)
+```
+and the cumulative proportions of the variances of the principal components are
+```julia; term=true
+m1.rePCA
+```
+
+A second model has the same fixed-effects structure but with uncorrelated random effects
+```julia;label=m2;term=true
+m2form = @formula (-1000/rt) ~ 1+F*P*Q*lQ*lT +
+    zerocorr(1+F+P+Q+lQ+lT|Subj) + zerocorr(1+P+Q+lQ+lT|Item);
+m2 = fit(MixedModel, m2form, dat, contrasts=contrasts)
+```
+
+Finally, the model used in Masson & Kliegl (2013, Table 1) as well as Masson, Rabe, and Kliegl (2017, Figure 2).
+
+```julia;label=m3;term=true
+m3form = @formula (-1000/rt) ~ 1 + F*P*Q*lQ*lT + (1+Q | Subj) + (0+lT | Subj) + zerocorr(1+P | Item);
+m3 = fit(MixedModel, m3form, dat, contrasts=contrasts)
+```
+
+# Appendix
+
+```julia;term=true
+using InteractiveUtils
+versioninfo()
+```
