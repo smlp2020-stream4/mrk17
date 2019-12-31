@@ -8,7 +8,7 @@ options:
 
 # Reading the CSV file
 
-For those with experience with `R`, data input, selection and transformation can be done in `R` then the cleaned data frame saved and imported into a Julia session using either the `RCall` or `RData` package.
+For those with experience with `R`, data input, selection and transformation can be done in `R`, then the cleaned data frame saved and imported into a Julia session using either the `RCall` or `RData` package.
 
 ## Packages
 
@@ -66,7 +66,7 @@ const HC = HelmertCoding();
 contrasts = Dict(n => HC for (n,v) in eachcol(dat, true) if length(levels(v)) == 2)
 ```
 
-The response to be modeled is the negative reciprocal or the response time.  As the response is measured in milliseconds we use `-1000/rt` which will have units of (negative) responses per second.
+The response to be modeled is the negative reciprocal of the response time.  As the response is measured in milliseconds we use `-1000/rt`, that is convert to a measure of (negative) speed.
 
 ```julia;label=m1;term=true
 m1form = @formula (-1000/rt) ~ 1+F*P*Q*lQ*lT + (1+F+P+Q+lQ+lT|Subj) + (1+P+Q+lQ+lT|Item);

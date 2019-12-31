@@ -14,7 +14,22 @@ editor_options:
   chunk_output_type: console
 ---
 
-# Reading the data
+# Reading the CSV file
+
+The file `MRK17_Exp1.csv` contains
+
+|Variable | Description|
+|---------|----------- |
+|Subj     | Subject identifier (`S01` to `S73`)|
+|CC       | Eight different random trial sequences (`cc1` to `cc8`); between-subject factor; not used |
+|trial    | Trial number (1 to 480 for each subject, performed in 10 blocks of 48)|
+|Q        | Target quality is _clear_ (`clr`) or _degraded_  (`deg`) |
+|F        | Target is _non-word_ (`NW`), _high frequency_ (`HF`) or _low frequency_ (`LF`)|
+|P        | Prime word is _related_ (`rel`) or _unrelated_ (`unr`) to target |
+|Pword    | Prime word; not used |
+|Item     | Target word or non-word  |
+|rt       | Reaction time [ms] |
+|Score    | Response was correct (`C`) or error (`E`)|
 
 ```{r}
 library(vroom)
@@ -25,11 +40,9 @@ data <- vroom("MRK17_Exp1.csv", delim=",", col_types='ffifffffif')
 str(data)
 ```
 
-# Preprocessing
+# Creating the lag variables
 
-## Lag variables
-
-The innovative hypotheses of this experiment relate to experimental effects associated with the last trial, specifically (1) its target quality (clear or dim) and (2) whether the last target (lagTrg) required a word or a nonword response (ignoring the frequency of the word).  These conditions are computed from the data. We also generate new lower-case labels for factor levels.
+The innovative hypotheses of this experiment relate to experimental effects associated with the last trial, specifically (1) its target quality (clear or dim) and (2) whether the last target (lagTrg) required a word or a nonword response (ignoring the frequency of the word).  These conditions are computed from the data. 
 
 ```{r}
 dat1 <- data %>%
@@ -39,7 +52,7 @@ dat1 <- data %>%
                )
 ```
 
-## Filtering observations
+# Filtering observations
 
 The first of a ten blocks of 48 trials occurred after a pause. Therefore it does not have valid lag information and these trials are excluded from the analyses. Also, in an LDT, all nonword trials are routinely left out from rt analyses. Finally, incorrectly answered word trials and trials with very short (< 300 ms) or very long rt's are removed as well. This leaves us with 16,409 observations.
 
@@ -53,9 +66,9 @@ dat2$F <- droplevels(dat2$F)  # get rid of empty "NW" level
 ```
 
 
-## Selecting variables
+# Selecting variables
 
-We keep only the relevant variables and reorder them according to that in articles.
+We keep only the relevant variables and reorder them. 
 
 ```{r}
 dat3 <- dat2 %>%
@@ -67,7 +80,7 @@ str(dat3)
 
 # Save
 
-The data (variables and observations) used by Masson et al. (2017) are available in file `MRK17_Exp1.RDS`
+The data (variables and observations) used by Masson et al. (2017) are available in file `MRK17_Exp1.rds`
 
 |Variable | Description|
 |---------|----------- |
