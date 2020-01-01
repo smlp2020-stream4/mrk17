@@ -1,0 +1,102 @@
+---
+title: "Using Indicators Rather Than Factor Variables"
+author: "Reinhold Kliegl"
+date: 2020-01-01
+options:
+    line_width: 92
+---
+
+# Reading data
+
+We read the data preprocessed with R and saved as RDS file.
+
+```julia;label=packages;term=true
+using CSV, DataFrames, MixedModels, RCall
+```
+
+```julia; label=input; term=true
+dat = CSV.read("MRK17_Exp1_xtra.csv")
+describe(dat)
+```
+Here F, P, Q, lQ, T are indicator variables (not factors)
+
+
+# Complex LMM
+
+This is *not* the maximal LMM because we do not include interaction terms and
+associated correlation parameters in the RE structure; will add this LMM later.
+
+## Model fit
+
+```julia; label=complexLMM_1, term=true
+m1form = @formula (-1000/rt) ~ 1+F*P*Q*lQ*lT +
+                              (1+F+P+Q+lQ+lT | Subj) +
+                              (1+P+Q+lQ+lT | Item);
+@time cmplxLMM = fit(MixedModel, m1form, dat)
+```
+
+## VCs and CPs
+
+```julia; label=complexLMM_2, term=true
+cmplxLMM.λ[1];
+cmplxLMM.λ[2];
+cmplxLMM.rePCA
+```
+
+## Model summary
+
+```julia; label=complexLMM_3, term=true
+show(cmplxLMM)
+```
+
+# Zero-correlation parameter LMM
+
+## Model fit
+
+```julia; label=zcpLMM_1, term=true
+m2form = @formula (-1000/rt) ~ 1 + F*P*Q*lQ*lT +
+                               zerocorr(1+F+P+Q+lQ+lT | Subj) +
+                               zerocorr(1+P+Q+lQ+lT | Item);
+
+@time zcpLMM = fit(LinearMixedModel, m2form, dat)
+```
+
+## VCs and CPs
+
+```julia; label=zcpLMM_2, term=true
+zcpLMM.λ[1];
+zcpLMM.λ[2];
+zcpLMM.rePCA
+```
+
+## Model summary
+
+```julia; label=zcpLMM_3, term=true
+show(zcpLMM)
+```
+
+# Parsimonious LMM
+
+Replication of final LMM in Masson and Kliegl (2013, Table 1) as well as
+reproduction of final lme4-based LMM in Masson, Rabe, and Kliegl (2017, Figure 2)
+
+```julia; label=prsmLMM_1, term=true
+m3form = @formula (-1000/rt) ~ 1 + F*P*Q*lQ*lT +
+                               (1+Q | Subj) + zerocorr(0+lT | Subj) +
+                               zerocorr(1+P | Item);
+@time mrk17_LMM = fit(LinearMixedModel, m3form, dat)
+```
+
+## VCs and CPs
+
+```julia; label=prsmLMM_2, term=true
+mrk17_LMM.λ[1];
+mrk17_LMM.λ[2];
+mrk17_LMM.rePCA
+```
+
+## Model summary
+
+```julia; label=prsmLMM_3, term=true
+show(mrk17_LMM)
+```
