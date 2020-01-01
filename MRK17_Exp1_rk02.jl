@@ -11,15 +11,10 @@ R"dat_r = readRDS('MRK17_Exp1.rds')"
 dat = rcopy(R"dat_r")
 describe(dat)
 
-# Model fitting
-
-## Coding of two-level factors
-### The contrasts for the two-level factors use the Helmert coding, which is ±1.
-
-const HC = HelmertCoding();
-contrasts = Dict(n => HC for (n,v) in eachcol(dat, true) if length(levels(v)) == 2)
+# Model fitting - F, P, Q, lQ, T are indicator variables (not factors)
 
 ## Complex LMM
+
 ### This is *not* the maximal LMM because we do not include interaction terms and
 ### associated correlation parameters in the RE structure; will add this LMM later.
 m1form = @formula (-1000/rt) ~ 1+F*P*Q*lQ*lT +
@@ -75,24 +70,8 @@ mrk17_LMM.λ[2]
 ### Cumulative proportions of the variance
 mrk17_LMM.rePCA
 
-
 ### Model summary
 show(mrk17_LMM)
 
-# Alternative parsimonious LMM
-m4form = @formula (-1000/rt) ~ 1 + F*P*Q*lQ*lT +
-                               (1+Q | Subj) + (0+lT | Subj) +
-                               zerocorr(1+P | Item)
-@time mrk17_LMM_b = fit(LinearMixedModel, m4form, dat, contrasts=contrasts)
-
-### Model summary
-show(mrk17_LMM_b)
-
-# Doug's version
-m5form = @formula (-1000/rt) ~ 1 + F*P*Q*lQ*lT + (1+Q | Subj) + (0+lT | Subj) + zerocorr(1+P | Item)
-m5 = fit(MixedModel, m5form, dat, contrasts=contrasts)
-
-### Model summary
-show(m5)
 # Appendix
 versioninfo()
