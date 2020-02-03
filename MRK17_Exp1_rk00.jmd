@@ -1,0 +1,38 @@
+---
+title: "Using Contrasts Rather Than Factor Variables"
+author: "Reinhold Kliegl"
+date: 2020-01-01
+options:
+    line_width: 92
+---
+
+# Packages 
+
+The following packages need to be added ("installed") once before they are available for use.
+
+```julia;label=packages;term=true
+using CSV, DataFrames, MixedModels, RCall
+```
+
+# Reading data
+
+```julia; label=input; term=true
+dat = CSV.read("MRK17_Exp1_xtra.csv")
+describe(dat)
+```
+Here F, P, Q, lQ, T are contrast-based variables (not factors)
+
+# LMM, varying only intercepts (oviLMM)
+
+## Model fit
+
+```julia; label=oviLMM_1, term=true
+m0form = @formula (-1000/rt) ~ 1+F*P*Q*lQ*lT + (1 | Subj) + (1 | Item)
+oviLMM = fit(MixedModel, m0form, dat)
+```
+
+## Model summary
+
+```julia; label=complexLMM_3, term=true
+show(oviLMM)
+```
