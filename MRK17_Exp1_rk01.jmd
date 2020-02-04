@@ -15,8 +15,8 @@ using CSV, DataFrames, MixedModels, RCall
 ```
 
 ```julia; label=input; term=true
-#cd(joinpath(homedir(),"Google Drive/ZiF_CG_WS2/MRK17_Exp1/"))
-cd("/Users/reinholdkliegl/Google Drive/ZiF_CG_WS2/MRK17_Exp1/")
+cd(joinpath(homedir(),"Google Drive/ZiF_CG_WS2/MRK17_Exp1/"))
+#cd("/Users/reinholdkliegl/Google Drive/ZiF_CG_WS2/MRK17_Exp1/")
 dat = CSV.read("MRK17_Exp1_xtra.csv")
 describe(dat)
 ```
@@ -43,6 +43,7 @@ m1form = @formula (-1000/rt) ~ 1+F*P*Q*lQ*lT +
 cmplxLMM.λ[1]
 cmplxLMM.λ[2]
 cmplxLMM.rePCA
+
 ```
 
 ## Model summary
