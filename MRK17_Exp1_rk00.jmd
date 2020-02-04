@@ -17,6 +17,7 @@ using CSV, DataFrames, MixedModels, RCall
 # Reading data
 
 ```julia; label=input; term=true
+cd("/Users/reinholdkliegl/Google Drive/ZiF_CG_WS2/MRK17_Exp1/")
 dat = CSV.read("MRK17_Exp1_xtra.csv")
 describe(dat)
 ```

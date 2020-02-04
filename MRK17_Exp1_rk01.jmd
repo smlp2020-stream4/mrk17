@@ -15,6 +15,8 @@ using CSV, DataFrames, MixedModels, RCall
 ```
 
 ```julia; label=input; term=true
+#cd(joinpath(homedir(),"Google Drive/ZiF_CG_WS2/MRK17_Exp1/"))
+cd("/Users/reinholdkliegl/Google Drive/ZiF_CG_WS2/MRK17_Exp1/")
 dat = CSV.read("MRK17_Exp1_xtra.csv")
 describe(dat)
 ```
@@ -38,8 +40,8 @@ m1form = @formula (-1000/rt) ~ 1+F*P*Q*lQ*lT +
 ## VCs and CPs
 
 ```julia; label=complexLMM_2, term=true
-cmplxLMM.λ[1];
-cmplxLMM.λ[2];
+cmplxLMM.λ[1]
+cmplxLMM.λ[2]
 cmplxLMM.rePCA
 ```
 
@@ -64,8 +66,8 @@ m2form = @formula (-1000/rt) ~ 1 + F*P*Q*lQ*lT +
 ## VCs and CPs
 
 ```julia; label=zcpLMM_2, term=true
-zcpLMM.λ[1];
-zcpLMM.λ[2];
+zcpLMM.λ[1]
+zcpLMM.λ[2]
 zcpLMM.rePCA
 ```
 
@@ -90,8 +92,8 @@ m3form = @formula (-1000/rt) ~ 1 + F*P*Q*lQ*lT +
 ## VCs and CPs
 
 ```julia; label=prsmLMM_2, term=true
-mrk17_LMM.λ[1];
-mrk17_LMM.λ[2];
+mrk17_LMM.λ[1]
+mrk17_LMM.λ[2]
 mrk17_LMM.rePCA
 ```
 
@@ -100,3 +102,4 @@ mrk17_LMM.rePCA
 ```julia; label=prsmLMM_3, term=true
 show(mrk17_LMM)
 ```
+

@@ -1,8 +1,8 @@
 # Setup
-cd(joinpath(homedir(),"Documents/ZiF_CG_WS2/MRK17_Exp1/"))
+cd(joinpath(homedir(),"Google Drive/ZiF_CG_WS2/MRK17_Exp1/"))
 pwd()
 
-using DataFramesMeta, DataFrames, InteractiveUtils, LinearAlgebra, MixedModels, RData, RCall, CSV, ShiftedArrays
+using DataFramesMeta, DataFrames, InteractiveUtils, MixedModels, RData, RCall, CSV
 
 
 # Works
