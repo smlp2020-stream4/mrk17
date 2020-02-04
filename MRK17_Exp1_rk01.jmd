@@ -40,6 +40,7 @@ m1form = @formula (-1000/rt) ~ 1+F*P*Q*lQ*lT +
 ## VCs and CPs
 
 ```julia; label=complexLMM_2, term=true
+issingular(samp2))
 cmplxLMM.λ[1]
 cmplxLMM.λ[2]
 cmplxLMM.rePCA
