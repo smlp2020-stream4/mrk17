@@ -74,10 +74,12 @@ typeof(samp.σs)
 
 This is to allow for random effects associated with more than one grouping factor.
 If we only have one grouping factor for random effects, which is the case here, we can use the `first` extractor, as in
+
 ```{julia;term=true}
 first(samp.σs)
 ```
 or, to carry this one step further,
+
 ```{julia;label="sigma1density";fig_width=7;fig_height=4;fig_ext=".svg"}
 plot(x=first.(first(samp.σs)), Geom.density,
     Guide.xlabel("Parametric bootstrap estimates of σ₁"))
@@ -117,7 +119,9 @@ A histogram of the estimated correlations from the bootstrap sample has a spike 
 plot(x = ρs, Geom.histogram,
     Guide.xlabel("Parametric bootstrap samples of correlation of random effects"))
 ```
+
 or, as a count,
+
 ```{julia;term=true}
 sum(ρs .≈ 1)
 ```
@@ -154,10 +158,6 @@ sum(issingular(samp2))
 ```
 # A current example (2020-02-04)
 
-From: https://github.com/JuliaStats/MixedModels.jl/pull/244 
-
-Not working yet here, use_threads not recognized.
-
 ```{julia; term=true}
 using DataFrames, Gadfly, MixedModels, Random, RData, RCall
 cd(joinpath(homedir(),"Google Drive/ZiF_CG_WS2/MRK17_Exp1/"))
@@ -166,6 +166,7 @@ const oxboys = rcopy(R"nlme::Oxboys");
 m1form = @formula height ~ 1 + age + (1 + age|Subject);
 m1 = fit(MixedModel, m1form, oxboys)
 ```
+
 
 ```{julia; term=true}
 @time samp_st=parametricbootstrap(MersenneTwister(1234321), 10_000, m1, use_threads=false);
