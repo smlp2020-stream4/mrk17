@@ -1,10 +1,15 @@
+# Problem: rePCA() results not invariant with linear transformation of predictor
+# Reinhold Kliegl, 2020-02-10
+
 using RData, DataFrames, DataFramesMeta, MixedModels, StatsBase
+
 sleepstudy = deepcopy(dat[:sleepstudy])
 colnames = ["Reaction", "Days", "Subject"]
 names!(sleepstudy, Symbol.(colnames))
 sleepstudy = @linq sleepstudy |>
              transform(Days2 = :Days .*2,
                        Days3 = :Days ./2)
+
 fm1 = fit(LinearMixedModel, @formula(Reaction ~ 1 + Days + (1 + Days | Subject)), sleepstudy2)
 fm1.rePCA
 
