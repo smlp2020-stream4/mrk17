@@ -3,35 +3,22 @@
 
 using  DataFrames, DataFramesMeta, MixedModels, StatsBase, Feather
 
-#sleepstudy = deepcopy(dat[:sleepstudy])
-#colnames = ["reaction", "days", "subj"]
-#names!(sleepstudy, Symbol.(colnames))
-
 sleepstudy =  Feather.read(joinpath(MixedModels.TestData, "sleepstudy.feather"))
+
+colnames = ["Subj", "days", "reaction"]
+rename!(sleepstudy, Symbol.(colnames))
 
 sleepstudy = @linq sleepstudy |>
              transform(days2 = :days .*2,
-                       days3 = :days ./2,
-                       Days = categorical(:days))
+                       days3 = :days ./2)
 
 # rePCA issue 
-fm1 = fit(LinearMixedModel, @formula(reaction ~ 1 + days + (1 + days | subj)), sleepstudy)
+fm1 = fit(LinearMixedModel, @formula(reaction ~ 1 + days + (1 + days | Subj)), sleepstudy)
 fm1.rePCA
 
-fm2 = fit(LinearMixedModel, @formula(reaction ~ 1 + days2 + (1 + days2 | subj)), sleepstudy)
+fm2 = fit(LinearMixedModel, @formula(reaction ~ 1 + days2 + (1 + days2 | Subj)), sleepstudy)
 fm2.rePCA
 
-fm3 = fit(LinearMixedModel, @formula(reaction ~ 1 + days3 + (1 + days3 | subj)), sleepstudy)
+fm3 = fit(LinearMixedModel, @formula(reaction ~ 1 + days3 + (1 + days3 | Subj)), sleepstudy)
 fm3.rePCA
-
-# Exploring fulldummy
-# ... default with CPs, no intercept
-fm4 = fit(LinearMixedModel, @formula(reaction ~ 0 + Days + (0 + Days | subj)), sleepstudy)
-
-# ... with intercept
-fm5 = fit(LinearMixedModel, @formula(reaction ~ 0 + Days + (1 + fulldummy(Days) | subj)), sleepstudy)
-
-# ... zerocorr
-fm6 = fit(LinearMixedModel, @formula(reaction ~ 0 + Days + zerocorr(1 + fulldummy(Days) | subj)), sleepstudy)
-
 
