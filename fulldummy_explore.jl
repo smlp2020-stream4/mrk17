@@ -5,16 +5,19 @@ using  DataFrames, DataFramesMeta, MixedModels, StatsBase, Feather
 
 sleepstudy =  Feather.read(joinpath(MixedModels.TestData, "sleepstudy.feather"))
 
+colnames = ["Subj", "days", "reaction"]
+rename!(sleepstudy, Symbol.(colnames))
+
 sleepstudy = @linq sleepstudy |>
              transform(Days = categorical(:days))
 
 # Exploring fulldummy
 # ... default with CPs, no intercept
-fm1 = fit(LinearMixedModel, @formula(reaction ~ 0 + Days + (0 + Days | subj)), sleepstudy)
+fm1 = fit(LinearMixedModel, @formula(reaction ~ 0 + Days + (0 + Days | Subj)), sleepstudy)
 
 # ... with intercept
-fm2 = fit(LinearMixedModel, @formula(reaction ~ 0 + Days + (1 + fulldummy(Days) | subj)), sleepstudy)
+fm2 = fit(LinearMixedModel, @formula(reaction ~ 0 + Days + (1 + fulldummy(Days) | Subj)), sleepstudy)
 
 # ... zerocorr
-fm3 = fit(LinearMixedModel, @formula(reaction ~ 0 + Days + zerocorr(1 + fulldummy(Days) | subj)), sleepstudy)
+fm3 = fit(LinearMixedModel, @formula(reaction ~ 0 + Days + zerocorr(1 + fulldummy(Days) | Subj)), sleepstudy)
 
