@@ -1,5 +1,5 @@
 # Problem: rePCA() results not invariant with linear transformation of predictor
-# Reinhold Kliegl, 2020-02-10
+# Reinhold Kliegl, 2020-02-11
 
 using  DataFrames, DataFramesMeta, MixedModels, StatsBase, Feather
 
@@ -24,16 +24,14 @@ fm2.rePCA
 fm3 = fit(LinearMixedModel, @formula(reaction ~ 1 + days3 + (1 + days3 | subj)), sleepstudy)
 fm3.rePCA
 
-# fulldummy
-# ... baseline
-fm4 = fit(LinearMixedModel, @formula(reaction ~ 0 + Days + (1 + Days | subj)), sleepstudy)
+# Exploring fulldummy
+# ... default with CPs, no intercept
+fm4 = fit(LinearMixedModel, @formula(reaction ~ 0 + Days + (0 + Days | subj)), sleepstudy)
 
-# ... problem
-fm5 = fit(LinearMixedModel, @formula(reaction ~ 0 + Days + fulldummy(0 + Days | subj)), sleepstudy)
+# ... with intercept
+fm5 = fit(LinearMixedModel, @formula(reaction ~ 0 + Days + (1 + fulldummy(Days) | subj)), sleepstudy)
 
-# ... problem
-fm6 = fit(LinearMixedModel, @formula(reaction ~ 0 + Days + fulldummy(1 + Days | subj)), sleepstudy)
-
-
+# ... zerocorr
+fm6 = fit(LinearMixedModel, @formula(reaction ~ 0 + Days + zerocorr(1 + fulldummy(Days) | subj)), sleepstudy)
 
 
