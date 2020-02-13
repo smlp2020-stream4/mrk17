@@ -1,9 +1,12 @@
 # Problem: rePCA() results not invariant with linear transformation of predictor
 # Reinhold Kliegl, 2020-02-11
 
-using  DataFrames, DataFramesMeta, MixedModels, StatsBase, Feather
+using  DataFrames, DataFramesMeta, MixedModels, StatsBase
 
-sleepstudy =  Feather.read(joinpath(MixedModels.TestData, "sleepstudy.feather"))
+# preinstalled datasets
+MixedModels.datasets()
+
+sleepstudy =  MixedModels.dataset(:sleepstudy)
 
 colnames = ["Subj", "days", "reaction"]
 rename!(sleepstudy, Symbol.(colnames))
