@@ -1,27 +1,40 @@
 ---
-title: "Using Indicators Rather Than Factor Variables"
+title: "RePsychLing Masson, Rabe, & Kliegl, 2017) with Julia"
 author: "Reinhold Kliegl"
-date: 2020-01-01
+date: 2020-02-13
 options:
     line_width: 92
 ---
 
-# Reading data
+# Setup
 
-We read the data preprocessed with R and saved as RDS file.
+Packages we (might) use.
 
 ```julia;label=packages;term=true
-using CSV, DataFrames, MixedModels, RCall
-```
+using CSV, DataFrames, MixedModels, RCall, BenchmarkTools
 
-```julia; label=input; term=true
 cd(joinpath(homedir(),"Google Drive/ZiF_CG_WS2/MRK17_Exp1/"))
 #cd("/Users/reinholdkliegl/Google Drive/ZiF_CG_WS2/MRK17_Exp1/")
-dat = CSV.read("MRK17_Exp1_xtra.csv")
-describe(dat)
 ```
+
+# Reading data
+
+We read the data preprocessed with R and saved as RDS file (see `DataPrep.Rmd` for details).
+
+# Everything with factors
+
+```julia; label=prsmLMM_3, term=true
+R"dat_r = readRDS('MRK17_Exp1.rds')"
+dat1 = rcopy(R"dat_r")
+```
+
 Here F, P, Q, lQ, T are indicator variables (not factors)
 
+```julia; label=input; term=true
+dat2 = CSV.read("MRK17_Exp1_xtra.csv")
+```
+
+Sometimes RE structures are more conviently specified with indicator variables (i.e., @ level of contrasts) than the factors.
 
 # Complex LMM
 
@@ -34,7 +47,7 @@ associated correlation parameters in the RE structure; will add this LMM later.
 m1form = @formula (-1000/rt) ~ 1+F*P*Q*lQ*lT +
                               (1+F+P+Q+lQ+lT | Subj) +
                               (1+P+Q+lQ+lT | Item);
-@time cmplxLMM = fit(MixedModel, m1form, dat)
+cmplxLMM = @btime fit(MixedModel, m1form, dat)
 ```
 
 ## VCs and CPs
@@ -62,7 +75,7 @@ m2form = @formula (-1000/rt) ~ 1 + F*P*Q*lQ*lT +
                                zerocorr(1+F+P+Q+lQ+lT | Subj) +
                                zerocorr(1+P+Q+lQ+lT | Item);
 
-@time zcpLMM = fit(LinearMixedModel, m2form, dat)
+zcpLMM = @btime fit(LinearMixedModel, m2form, dat)
 ```
 
 ## VCs and CPs
@@ -88,7 +101,7 @@ reproduction of final lme4-based LMM in Masson, Rabe, and Kliegl (2017, Figure 2
 m3form = @formula (-1000/rt) ~ 1 + F*P*Q*lQ*lT +
                                (1+Q | Subj) + zerocorr(0+lT | Subj) +
                                zerocorr(1+P | Item);
-@time mrk17_LMM = fit(LinearMixedModel, m3form, dat)
+mrk17_LMM = @btime fit(LinearMixedModel, m3form, dat)
 ```
 
 ## VCs and CPs
@@ -104,4 +117,5 @@ mrk17_LMM.rePCA
 ```julia; label=prsmLMM_3, term=true
 show(mrk17_LMM)
 ```
+
 
