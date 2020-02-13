@@ -1,9 +1,9 @@
 # Use fulldummy() for correlation (of GM and day) means of categorical timeseries
 # Reinhold Kliegl, 2020-02-11
 
-using  DataFrames, DataFramesMeta, MixedModels, StatsBase, Feather
+using  DataFrames, DataFramesMeta, MixedModels, StatsBase
 
-sleepstudy =  Feather.read(joinpath(MixedModels.TestData, "sleepstudy.feather"))
+sleepstudy =  MixedModels.dataset("sleepstudy")
 
 colnames = ["Subj", "days", "reaction"]
 rename!(sleepstudy, Symbol.(colnames))
