@@ -73,11 +73,13 @@ dat$trial.c <- dat$trial - 240 # intercept is last trial of first half of sessio
 
 # A parsimonious LMM
 
+
+## Replication
 This LMM specification is identical to the final LMM in Masson & Kliegl (2013, Table 1) as well as Masson, Rabe, and Kliegl (2017, Figure 2).
 
 ```{r m_prsm, cache=TRUE}
 prsmLMM <- lmer(rrt ~ 1 + F*P*Q*lQ*lT + (1+q | Subj) + (0+lq | Subj) + (1 | Item) + (0+p | Item), 
-                     data=dat, REML=FALSE, control=lmerControl(calc.derivs=FALSE))
+                      data=dat, REML=FALSE, control=lmerControl(calc.derivs=FALSE))
 
 summary(rePCA(prsmLMM))
 VarCorr(prsmLMM)
@@ -85,6 +87,61 @@ VarCorr(prsmLMM)
 print(summary(prsmLMM), corr=FALSE)
 ```
 
+## A priori F x P interactions 
+
+### Wilkinson & Rogers (1973) syntax
+
+The theoretical interactions relate to the interaction of `F` and `P`. We test this interaction in each cells of the _outer_ design crossing lQ x lT trial histories.
+
+```{r}
+n_in_cLMM <- lmer(rrt ~ 1 + ((lQ*lT)/(F*P))*Q + (1+q | Subj) + (0+lq | Subj) + (1 | Item) + (0+p | Item), 
+                        data=dat, REML=FALSE, control=lmerControl(calc.derivs=FALSE))
+
+summary(rePCA(n_in_cLMM))
+VarCorr(n_in_cLMM)
+
+print(summary(n_in_cLMM), corr=FALSE)
+```
+
+### Custom contrasts (Masson & Kliegl, 2013)
+
+
+```{r}
+# Is the F x P interaction oppositely significant within levels of Lag_Target by LagQuality? YES! see m1
+dat$WLFP <- factor(paste(substr(dat$W, 1, 1), substr(dat$L, 1, 1), substr(dat$F, 1, 1), substr(dat$P, 1, 1), sep="_") )
+
+# ... re-order alphabetically sorted levels to correspond to factorial design
+d$WLFP <- factor(d$WLFP, levels=c(levels(d$WLFP)[9:16], levels(d$WLFP)[1:8]) )
+
+# Setup matrix for f x p as nested within levels of w x l
+cmat   <- matrix(c(            -1/8, -1/8, -1/8, -1/8, -1/8, -1/8, -1/8, -1/8, +1/8, +1/8, +1/8, +1/8, +1/8, +1/8, +1/8, +1/8,
+                               -1/8, -1/8, -1/8, -1/8, +1/8, +1/8, +1/8, +1/8, -1/8, -1/8, -1/8, -1/8, +1/8, +1/8, +1/8, +1/8,
+                               +1/8, +1/8, +1/8, +1/8, -1/8, -1/8, -1/8, -1/8, -1/8, -1/8, -1/8, -1/8, +1/8, +1/8, +1/8, +1/8,
+                               -1/2, -1/2, +1/2, +1/2,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+                               -1/2, +1/2, -1/2, +1/2,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+                               +1/2, -1/2, -1/2, +1/2,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+                                  0,    0,    0,    0, -1/2, -1/2, +1/2, +1/2,    0,    0,    0,    0,    0,    0,    0,    0,
+                                  0,    0,    0,    0, -1/2, +1/2, -1/2, +1/2,    0,    0,    0,    0,    0,    0,    0,    0,
+                                  0,    0,    0,    0, +1/2, -1/2, -1/2, +1/2,    0,    0,    0,    0,    0,    0,    0,    0,
+                                  0,    0,    0,    0,    0,    0,    0,    0, -1/2, -1/2, +1/2, +1/2,    0,    0,    0,    0,
+                                  0,    0,    0,    0,    0,    0,    0,    0, -1/2, +1/2, -1/2, +1/2,    0,    0,    0,    0,
+                                  0,    0,    0,    0,    0,    0,    0,    0, +1/2, -1/2, -1/2, +1/2,    0,    0,    0,    0,
+                                  0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0, -1/2, -1/2, +1/2, +1/2,
+                                  0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0, -1/2, +1/2, -1/2, +1/2,
+                                  0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0, +1/2, -1/2, -1/2, +1/2 ), 16, 15)
+
+cmat.i <- fractions(t(ginv(cmat)))
+rownames(cmat.i) <- levels(d$WLFP)
+colnames(cmat.i) <- c(".lW", ".lQ", ".lW_lQ", ".f1", ".p1", ".fp1", ".f2", ".p2", ".fp2", ".f3", ".p3", ".fp3", ".f4", ".p4", ".fp4")
+(contrasts(d$WLFP) <- cmat.i)
+
+print(m1 <- lmer(rrt ~ 1 + WLFP*Q + (1 | id) + (1 | st), data=d), cor=FALSE)
+
+# ... ... check for equality of logLik of m0 and m1
+anova(m0, m1)
+
+
+```
 
 # Appendix
 
