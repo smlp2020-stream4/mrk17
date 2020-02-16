@@ -18,10 +18,11 @@ sleepstudy = @linq sleepstudy |>
 # rePCA issue 
 fm1 = fit(LinearMixedModel, @formula(reaction ~ 1 + days + (1 + days | Subj)), sleepstudy)
 fm1.rePCA
-
-fm2 = fit(LinearMixedModel, @formula(reaction ~ 1 + days2 + (1 + days2 | Subj)), sleepstudy)
+rePCA(fm1)
+fm2 = fit(LinearMixedModel, @formula(reaction ~ 1 + days2 + (1 + days2 | Subj)), sleepstudy)]
 fm2.rePCA
 
 fm3 = fit(LinearMixedModel, @formula(reaction ~ 1 + days3 + (1 + days3 | Subj)), sleepstudy)
 fm3.rePCA
 
+# function rePCA(m::LinearMixedModel, corr::Bool=true; loadings::Bool=false)
