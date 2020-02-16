@@ -258,7 +258,7 @@ version = "0.4.3"
 
 [[MixedModels]]
 deps = ["BlockArrays", "BlockDiagonals", "Distributions", "Feather", "GLM", "LinearAlgebra", "NLopt", "NamedArrays", "Pkg", "Printf", "ProgressMeter", "Random", "Showoff", "SparseArrays", "StaticArrays", "Statistics", "StatsBase", "StatsFuns", "StatsModels", "Tables", "TypedTables"]
-git-tree-sha1 = "124b745d740c98e2f0df5914fad80823e1a3f562"
+git-tree-sha1 = "b9ed085781fae93b4c13d8a4254ea50bb3a059a7"
 repo-rev = "master"
 repo-url = "https://github.com/JuliaStats/MixedModels.jl.git"
 uuid = "ff71e718-51f3-5ec2-a782-8ffcbfa3c316"

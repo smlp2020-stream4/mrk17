@@ -18,10 +18,10 @@ using MixedModels
 using CSV, DataFrames, DataFramesMeta, RCall 
 using StatsBase, StatsModels, BenchmarkTools
 
-# needed for LRT w/ AIC, AICc, BIC
-# using Printf: @sprintf
-# using Distributions: Chisq, ccdf
-# include("lrtest.jl")
+# needed for LRT 
+using Printf: @sprintf
+using Distributions: Chisq, ccdf
+include("lrtest.jl")
 
 ```
 
@@ -61,6 +61,8 @@ m1form = @formula (-1000/rt) ~ 1+F*P*Q*lQ*lT +
                               (1+F+P+Q+lQ+lT | Subj) +
                               (1+P+Q+lQ+lT | Item);
 cmplxLMM = @btime fit(MixedModel, m1form, dat, contrasts=contrasts);
+cmplxLMM.rePCA
+VarCorr(cmplxLMM)
 ```
 
 ## VCs and CPs
@@ -70,7 +72,6 @@ We don't look at fixed effects before model selection.
 ```julia; label=complexLMM_2, term=true
 cmplxLMM.λ[1]
 cmplxLMM.λ[2]
-cmplxLMM.rePCA
 ```
 
 Variance-covariance matrix of random-effect structure suggests overparameterization
@@ -89,13 +90,7 @@ m2form = @formula (-1000/rt) ~ 1 + F*P*Q*lQ*lT +
                                zerocorr(1+P+Q+lQ+lT | Item);
 
 zcpLMM = @btime fit(LinearMixedModel, m2form, dat, contrasts=contrasts);
-```
-
-## VCs and CPs
-
-```julia; label=zcpLMM_2, term=true
-zcpLMM.λ[1]
-zcpLMM.λ[2]
+VarCorr(zcpLMM)
 zcpLMM.rePCA
 ```
 
@@ -108,7 +103,7 @@ Sometimes RE structures are more conviently specified with indicator variables (
 @ level of contrasts) than the factors.
 
 ```julia; label=indicators, term=true
-mm = Int.(mrk17_LMM.X)
+mm = Int.(zcpLMM.X)
 
 dat = @linq dat |>
        transform(f = mm[:, 2],
@@ -180,7 +175,7 @@ mrk17_LMM_b = @btime fit(LinearMixedModel, m3form_b, dat, contrasts=contrasts);
 VarCorr(mrk17_LMM_b)
 VarCorr(mrk17_LMM)
 ```
-This will be fixed. 
+This will be fixed ...
 
 # Model comparisons
 
@@ -221,9 +216,9 @@ cellmeans = by(dat, [:F, :P],
 
 The interaction tests whether lines visualizing the interaction are parallel, 
 but depending on the theoretical context one might be interested whether the
-priming effect is significant high frequency targets and for low frequency targets. 
-In other words, the focus is on whether the priming effect is significant for 
-the levels of the frequency factor.
+priming effect is significant for high frequency targets as well as for low frequency 
+targets. In other words, the focus is on whether the priming effect is significant at 
+each level of the frequency factor.
 
 ```julia; label=nested_LMM, term=true
 m6form = @formula rt ~ 1 + F/P + (1 | Subj) + (1 | Item);
