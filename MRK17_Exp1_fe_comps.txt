@@ -1,0 +1,50 @@
+Agreement of fixed effect
+
+Custom coding v2               WR                                    hypr v1
+             Estimate t value                     Estimate t value                          Estimate t value
+(Intercept) -1.638443 -78.091   (Intercept)      -1.638443 -78.091    (Intercept)          -1.638443 -78.091
+TLFP.lT      0.015987   3.386   lT1               0.007994   3.386    lTlt                  0.007994   3.386
+TLFP.lQ      0.003278   0.694   lQ1               0.001639   0.694    lQlq                  0.001639   0.694
+TLFP.lT:lQ   0.009228   1.953   lT1:lQ1           0.004614   1.953    lTlt:lQlq             0.004614   1.953
+                                                                                                     
+TLFP.f1      0.043763   3.692   lTNW:lQdeg:F1     0.021881   3.692    lTNW:lQdeg:Ffrq       0.021881   3.692
+TLFP.f2      0.036742   3.092   lTWD:lQdeg:F1     0.018371   3.092    lTWD:lQdeg:Ffrq       0.018371   3.092
+TLFP.f3      0.032272   2.728   lTNW:lQclr:F1     0.016136   2.728    lTNW:lQclr:Ffrq       0.016136   2.728
+TLFP.f4      0.041403   3.499   lTWD:lQclr:F1     0.020702   3.499    lTWD:lQclr:Ffrq       0.020702   3.499
+                                                                                                     
+TLFP.p1      0.042172   4.467   lTNW:lQdeg:P1     0.021086   4.467    lTNW:lQdeg:Pprm       0.021086   4.467
+TLFP.p2      0.044057   4.647   lTWD:lQdeg:P1     0.022029   4.647    lTWD:lQdeg:Pprm       0.022029   4.647
+TLFP.p3      0.031112   3.300   lTNW:lQclr:P1     0.015556   3.300    lTNW:lQclr:Pprm       0.015556   3.300
+TLFP.p4      0.033418   3.548   lTWD:lQclr:P1     0.016709   3.548    lTWD:lQclr:Pprm       0.016709   3.548
+                                                                                                     
+TLFP.fp1     0.009899   1.048   lTNW:lQdeg:F1:P1  0.004950   1.048    lTNW:lQdeg:Ffrq:Pprm  0.004950   1.048
+TLFP.fp2     0.016033   1.691   lTWD:lQdeg:F1:P1  0.008017   1.691    lTWD:lQdeg:Ffrq:Pprm  0.008017   1.691
+TLFP.fp3     0.024451   2.594   lTNW:lQclr:F1:P1  0.012226   2.594    lTNW:lQclr:Ffrq:Pprm  0.012226   2.594
+TLFP.fp4     0.008704   0.924   lTWD:lQclr:F1:P1  0.004352   0.924    lTWD:lQclr:Ffrq:Pprm  0.004352   0.924
+
+
+Custom coding v1               hypr v2 
+             Estimate t value                       Estimate t value
+(Intercept) -1.638443 -78.091   (Intercept)        -1.638443 -78.091
+TLFP.lT      0.015987   3.386   fpqtlq              0.001639   0.694
+TLFP.lQ      0.003278   0.694   fpqtlt              0.007994   3.386
+TLFP.lT_lQ   0.009228   1.953   fpqtlq.lt           0.004614   1.953
+                                
+TLFP.f1      0.041403   3.499   fpqtclr.WD.frq      0.020702   3.499
+TLFP.p1      0.033418   3.548   fpqtclr.WD.prm      0.016709   3.548
+TLFP.fp1     0.008704   0.924   fpqtclr.WD.frq.prm  0.004352   0.924
+                                
+TLFP.f2      0.036742   3.092   fpqtdeg.WD.frq      0.018371   3.092
+TLFP.p2      0.044057   4.647   fpqtdeg.WD.prm      0.022029   4.647
+TLFP.fp2     0.016033   1.691   fpqtdeg.WD.frq.prm  0.008017   1.691
+                                
+TLFP.f3      0.032272   2.728   fpqtclr.NW.frq      0.016136   2.728
+TLFP.p3      0.031112   3.300   fpqtclr.NW.prm      0.015556   3.300
+TLFP.fp3     0.024451   2.594   fpqtclr.NW.frq.prm  0.012226   2.594
+                                
+TLFP.f4      0.043763   3.692   fpqtdeg.NW.frq      0.021881   3.692
+TLFP.p4      0.042172   4.467   fpqtdeg.NW.prm      0.021086   4.467
+TLFP.fp4     0.009899   1.048   fpqtdeg.NW.frq.prm  0.004950   1.048
+
+
+
