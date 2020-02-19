@@ -33,3 +33,7 @@ The resulting data set consists of 16409 observations of 9 variables.
 The data are read and prepared for analysis using `R` in `DataPrep.Rmd` with the analysis data set being saved in RDS format as `MRK17_Exp1.rds`.  This file can be read in Julia using either the `RData` or `RCall` packages.  (At present it seems safer to use `RCall`.)
 
 The original CSV file is read and prepared for analysis with Julia directly in `DataPrep.jmd`.
+
+## Acknowledgements
+
+This work was supported by the Center for Interdisciplinary Research, Bielefeld (ZiF) Cooperation Group "Statistical models for psychological and linguistic data".
