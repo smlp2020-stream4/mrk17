@@ -1,0 +1,128 @@
+---
+title: "rePCA() Demo"
+author: "Reinhold Kliegl"
+date: 2020-02-26
+---
+
+## Background
+
+In the R-based `lme4` package, `rePCA()` results are not invariant with linear transformation of predictor
+if based on (relative) covariance matrix. In the Julia-based `MixedModels` package, by default they are based
+on the correlation, not the covariance matrix. The covariance-based version is available with 
+`MixedModels.PCA(model, corr=false)`. 
+
+## Packages
+```julia
+using DataFrames, DataFramesMeta, MixedModels, RCall
+using StatsBase, StatsModels, BenchmarkTools
+```
+
+## Sleepstudy
+
+```julia
+MixedModels.datasets()
+
+sleepstudy =  MixedModels.dataset(:sleepstudy)
+
+colnames = ["Subj", "days", "reaction"]
+rename!(sleepstudy, Symbol.(colnames))
+
+sleepstudy = @linq sleepstudy |>
+             transform(days2 = :days .*2,
+                       days3 = :days ./2);
+````
+
+## LMMs
+
+LMM `fm2` and `fm3` use a linear transformation of `days`
+
+```julia
+fm1 = fit(LinearMixedModel, @formula(reaction ~ 1 + days  + (1 + days | Subj)), sleepstudy)
+fm2 = fit(LinearMixedModel, @formula(reaction ~ 1 + days2 + (1 + days2 | Subj)), sleepstudy)
+fm3 = fit(LinearMixedModel, @formula(reaction ~ 1 + days3 + (1 + days3 | Subj)), sleepstudy)
+```
+
+## Inspect rePCA property 
+
+When we use `corr=true` -- normalized cumulative proportion of variance is the same
+```julia
+fm1.rePCA
+```
+```julia
+fm2.rePCA
+```
+```julia
+fm3.rePCA
+```
+
+Equivalent info for `MixedModels.PCA(fm, corr=true)`
+
+```julia
+MixedModels.PCA(fm1, corr=true)
+```
+
+```julia
+MixedModels.PCA(fm2, corr=true)
+```
+
+```julia
+MixedModels.PCA(fm3, corr=true)
+```
+ ... but not for `MixedModels.PCA(fm, corr=false)` 
+
+```julia
+MixedModels.PCA(fm1, corr=false)
+```
+
+```julia
+MixedModels.PCA(fm2, corr=false)
+```
+
+```julia
+MixedModels.PCA(fm3, corr=false)
+```
+
+The normalized cumulative proportions of variance reported for `corr=false` 
+agree with results from `lme4::rePCA()` as shown below. 
+
+## MixedModel.PCA() default options 
+
+The `show()` provides additional information. Here are the options.
+
+```
+Base.show(pca::PCA;
+          ndigitsmat=2, ndigitsvec=2, ndigitscum=4,
+          covcor=true, loadings=true, variances=false, stddevs=false
+```
+
+For example, to obtain only inequivalent cumulative proportions of variance.
+
+```julia
+fm1_pca_f = MixedModels.PCA(fm1, corr=false);
+show(fm1_pca_f.Subj, covcor=false, loadings=false, variances=false, stddevs=false)  
+# Note: Must add grouping identifier!
+
+fm2_pca_f = MixedModels.PCA(fm2, corr=false);
+show(fm2_pca_f.Subj, covcor=false, loadings=false, variances=false, stddevs=false)
+
+fm3_pca_f = MixedModels.PCA(fm3, corr=false);
+show(fm3_pca_f.Subj, covcor=false, loadings=false, variances=false, stddevs=false)
+```
+## R-based lme4::rePCA() results
+
+```julia
+R"""
+library(lme4)
+
+Days2 <- sleepstudy$Days*2
+Days3 <- sleepstudy$Days/2
+
+fm1 <- lmer(Reaction ~ 1 + Days + (1 + Days | Subject), sleepstudy, REML=FALSE)
+fm2 <- lmer(Reaction ~ Days2 + (1 + Days2 | Subject), sleepstudy, REML=FALSE)
+fm3 <- lmer(Reaction ~ Days3 + (1 + Days3 | Subject), sleepstudy, REML=FALSE)
+
+print(summary(rePCA(fm1)))
+print(summary(rePCA(fm2)))  
+print(summary(rePCA(fm3)))
+""";
+```

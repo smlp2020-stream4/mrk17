@@ -46,7 +46,3 @@ MixedModels.PCA(fm3, corr=false)
 fm1_pca_f = MixedModels.PCA(fm1, corr=false);
 show(fm1_pca_f.Subj, covcor=false, loadings=false, variances=false, stddevs=false)  
 # Note: Must add grouping identifier!
-
-fm2_pca_f = MixedModels.PCA(fm2, corr=false);
-show(fm2_pca_f.Subj, covcor=false, loadings=false, variances=false, stddevs=false)  
-
