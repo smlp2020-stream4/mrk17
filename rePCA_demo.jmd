@@ -37,7 +37,7 @@ sleepstudy = @linq sleepstudy |>
 LMM `fm2` and `fm3` use a linear transformation of `days`
 
 ```julia
-fm1 = fit(LinearMixedModel, @formula(reaction ~ 1 + days  + (1 + days | Subj)), sleepstudy)
+fm1 = fit(LinearMixedModel, @formula(reaction ~ 1 + days  + (1 + days  | Subj)), sleepstudy)
 fm2 = fit(LinearMixedModel, @formula(reaction ~ 1 + days2 + (1 + days2 | Subj)), sleepstudy)
 fm3 = fit(LinearMixedModel, @formula(reaction ~ 1 + days3 + (1 + days3 | Subj)), sleepstudy)
 ```
@@ -100,7 +100,7 @@ For example, to obtain only inequivalent cumulative proportions of variance.
 ```julia
 fm1_pca_f = MixedModels.PCA(fm1, corr=false);
 show(fm1_pca_f.Subj, covcor=false, loadings=false, variances=false, stddevs=false)  
-# Note: Must add grouping identifier!
+# Note: Must add group identifier '.Subj' to model object name!
 
 fm2_pca_f = MixedModels.PCA(fm2, corr=false);
 show(fm2_pca_f.Subj, covcor=false, loadings=false, variances=false, stddevs=false)
@@ -112,14 +112,15 @@ show(fm3_pca_f.Subj, covcor=false, loadings=false, variances=false, stddevs=fals
 
 ```julia
 R"""
+library(Matrix)
 library(lme4)
 
 Days2 <- sleepstudy$Days*2
 Days3 <- sleepstudy$Days/2
 
-fm1 <- lmer(Reaction ~ 1 + Days + (1 + Days | Subject), sleepstudy, REML=FALSE)
-fm2 <- lmer(Reaction ~ Days2 + (1 + Days2 | Subject), sleepstudy, REML=FALSE)
-fm3 <- lmer(Reaction ~ Days3 + (1 + Days3 | Subject), sleepstudy, REML=FALSE)
+fm1 <- lmer(Reaction ~ 1 + Days  + (1 + Days  | Subject), sleepstudy, REML=FALSE)
+fm2 <- lmer(Reaction ~ 1 + Days2 + (1 + Days2 | Subject), sleepstudy, REML=FALSE)
+fm3 <- lmer(Reaction ~ 1 + Days3 + (1 + Days3 | Subject), sleepstudy, REML=FALSE)
 
 print(summary(rePCA(fm1)))
 print(summary(rePCA(fm2)))  
