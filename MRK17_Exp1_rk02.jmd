@@ -326,3 +326,10 @@ The results show that the priming effect is not significant for high-frequency
 targets. The estimates are the differences of the cell means from the grand 
 mean (i.e., 2 x estimate = effect).
 
+# Appendix
+
+```julia; label=appendix, term=true
+using InteractiveUtils
+versioninfo()
+```
+
