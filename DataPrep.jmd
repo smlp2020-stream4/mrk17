@@ -49,9 +49,9 @@ The 480 trials for each subject were conducted as 10 blocks of 48 trials.  The r
 The transformation, row and column selections are all wrapped in a query, like those of SQL (Structured Query Language), using the `@linq` (language integrated query) macro from the `DataFramesMeta` package
 ```julia;label=linq;term=true
 dat = @linq mrk17 |>
-    transform(lQ = lag(:Q), lT = lag(replace.(:F, r"[LH]F" => "WD"))) |>
+ #   transform(lQ = lag(:Q), lT = lag(replace.(:F, r"[LH]F" => "WD"))) |>
     where(:F .≠ "NW", :Score .== "C", 300 .≤ :rt .≤ 3000, rem.(:trial, 48) .≠ 1) |>
-    select(:Subj, :Item, :trial, :F, :P, :Q, :lQ, :lT, :rt);
+    select(:Subj, :Item, :trial, :F, :P, :Q, :rt);
 disallowmissing!(dat); # lQ and lT allow for but does not contain missing data
 describe(dat)
 ```
@@ -69,7 +69,7 @@ contrasts = Dict(n => HC for (n,v) in eachcol(dat, true) if length(levels(v)) ==
 The response to be modeled is the negative reciprocal of the response time.  As the response is measured in milliseconds we use `-1000/rt`, that is convert to a measure of (negative) speed.
 
 ```julia;label=m1;term=true
-m1form = @formula (-1000/rt) ~ 1+F*P*Q*lQ*lT + (1+F+P+Q+lQ+lT|Subj) + (1+P+Q+lQ+lT|Item);
+m1form = @formula (-1000/rt) ~ 1+F*P*Q + (1+F+P+Q |Subj) + (1+P+Q |Item);
 m1 = fit(MixedModel, m1form, dat, contrasts=contrasts)
 ```
 
@@ -88,15 +88,14 @@ m1.rePCA
 
 A second model has the same fixed-effects structure but with uncorrelated random effects
 ```julia;label=m2;term=true
-m2form = @formula (-1000/rt) ~ 1+F*P*Q*lQ*lT +
-    zerocorr(1+F+P+Q+lQ+lT|Subj) + zerocorr(1+P+Q+lQ+lT|Item);
+m2form = @formula (-1000/rt) ~ 1+F*P*Q + zerocorr(1+F+P+Q|Subj) + zerocorr(1+P+Q|Item);
 m2 = fit(MixedModel, m2form, dat, contrasts=contrasts)
 ```
 
-Finally, the model used in Masson & Kliegl (2013, Table 1) as well as Masson, Rabe, and Kliegl (2017, Figure 2).
+Finally, the model used in Masson & Kliegl (2013, Table 1) as well as Masson, Rabe, and Kliegl (2017, Figure 2) w/o lag terms.
 
 ```julia;label=m3;term=true
-m3form = @formula (-1000/rt) ~ 1 + F*P*Q*lQ*lT + (1+Q | Subj) + (0+lT | Subj) + zerocorr(1+P | Item);
+m3form = @formula (-1000/rt) ~ 1 + F*P*Q + (1+Q | Subj) + zerocorr(1+P | Item);
 m3 = fit(MixedModel, m3form, dat, contrasts=contrasts)
 ```
 

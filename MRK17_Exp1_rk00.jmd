@@ -1,47 +1,68 @@
 ---
-title: "Basic Setup for MixedModels"
+title: "Basic Setup for MixedModels (v2)"
 author: "Reinhold Kliegl"
-date: 2020-01-01
+date: 2020-08-22
 options:
     line_width: 92
 ---
 
-# Packages 
-
-The following packages need to be added ("installed") once before they are available for use.
-
-```julia;label=packages;term=true
-using CSV, DataFrames, MixedModels, RCall
+ 
+```julia
+using CSV, DataFrames, MixedModels
 ```
 
 # Reading data
 
-```julia; label=input; term=true
-cd(joinpath(homedir(),"Google Drive/ZiF_CG_WS2/MRK17_Exp1/"))
-#cd("/Users/reinholdkliegl/Google Drive/ZiF_CG_WS2/MRK17_Exp1/")
-dat = CSV.read("MRK17_Exp1_xtra.csv")
+```julia
+dat = CSV.read("MRK17_Exp1_xtra.csv");
 describe(dat)
 ```
-Here F, P, Q, lQ, T are contrast-based indicator variables (not factors)
+Here F, P, Q, lQ, and lT are contrast-based indicator variables (not factors)
 
 # LMM, varying only intercepts (oviLMM)
 
-## Model fit
+## Model selection
 
-```julia; label=oviLMM_1, term=true
-m0form = @formula (-1000/rt) ~ 1+F*P*Q*lQ*lT + (1 | Subj) + (1 | Item);
-oviLMM = fit(MixedModel, m0form, dat);
+```julia
+oviform = @formula (-1000/rt) ~ 1+F*P*Q*lQ*lT + (1 | Subj) + (1 | Item);
+oviLMM = fit(MixedModel, oviform, dat);
 VarCorr(oviLMM)
 ```
 
+Not much to worry about here; VCs for GM for random factors `Subj` and `Item` 
+are basically default. We do not look at fixed effects during model selection.
+  
 ## Model summary
 
-```julia; label=complexLMM_3, term=true
+After model selection we look at all estimates.
+
+```julia
 show(oviLMM)
 ```
 
-## Appendix
-```julia; label=Appendix, term=true
-using InteractiveUtils
-versioninfo()
-```
+# Weave the document in the REPL
+
++ Pkg.add("Weave")  # only once for installation
++ using Weave
++ weave("MRK17_Exp1_rk00.jmd", doctype="md2html")
+
+# Switch to jupyter notebook from REPL
+
++ Pkg.add("IJulia")  # only once for installation
++ using Weave, IJulia
++ convert_doc("MRK17_Exp1_rk00.jmd", "MRK17_Exp1_rk00.ipynb")
++ IJulia.notebook(dir=".")
+
+# OPTION: Install Anaconda or Conda
+
+Jupyter notebook (or JupyterLab) requires an installation of Conda. 
+The IJulia package contains this environment. If it does not work,
+there is an easy way to get access to Jupyter notebook or JupyterLab. 
+
+(1) Install Anaconda Individual Edition. 
+
++ https://docs.anaconda.com/anaconda/install/
+
+(2) Actually, probably all you need is available with Conda (Miniconda).
+
++ https://docs.conda.io/projects/continuumio-conda/en/latest/index.html 
